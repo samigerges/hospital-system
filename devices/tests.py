@@ -71,6 +71,39 @@ class MaintenanceWorkOrderTests(TestCase):
         maintenance.save()
         self.assertFalse(maintenance.is_sla_breached)
 
+
+    def test_device_becomes_inactive_when_work_order_opened(self):
+        self.device.status = 'active'
+        self.device.save(update_fields=['status'])
+
+        Maintenance.objects.create(
+            device=self.device,
+            maintenance_type='corrective',
+            technician='Tech 1',
+            assigned_technician='Tech 2',
+            description='Fix issue',
+            status='new',
+        )
+
+        self.device.refresh_from_db()
+        self.assertEqual(self.device.status, 'inactive')
+
+    def test_device_becomes_active_when_all_work_orders_closed(self):
+        maintenance = Maintenance.objects.create(
+            device=self.device,
+            maintenance_type='corrective',
+            technician='Tech 1',
+            assigned_technician='Tech 2',
+            description='Fix issue',
+            status='in_progress',
+        )
+
+        maintenance.status = 'verified'
+        maintenance.save()
+
+        self.device.refresh_from_db()
+        self.assertEqual(self.device.status, 'active')
+
     def test_tco_and_replacement_score(self):
         Maintenance.objects.create(
             device=self.device,

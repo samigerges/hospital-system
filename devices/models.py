@@ -62,6 +62,8 @@ class Device(models.Model):
         verbose_name = 'Device'
         verbose_name_plural = 'Devices'
         ordering = ['-created_at']
+
+    AUTO_INACTIVE_MAINTENANCE_STATUSES = {'new', 'assigned', 'in_progress', 'waiting_parts'}
     
     def __str__(self):
         return f"{self.name} ({self.device_id})"
@@ -106,6 +108,23 @@ class Device(models.Model):
             self.generate_qr_code()
             kwargs.pop('force_insert', None)
             super().save(*args, **kwargs)
+
+    def sync_status_with_open_work_orders(self, save=True):
+        """Keep the device status aligned with current maintenance work order state."""
+        if self.status == 'retired':
+            return self.status
+
+        has_open_work_order = self.maintenances.filter(
+            status__in=self.AUTO_INACTIVE_MAINTENANCE_STATUSES
+        ).exists()
+
+        target_status = 'inactive' if has_open_work_order else 'active'
+        if self.status != target_status:
+            self.status = target_status
+            if save:
+                self.save(update_fields=['status', 'updated_at'])
+
+        return self.status
 
     @property
     def total_maintenance_cost(self):
@@ -217,6 +236,12 @@ class Maintenance(models.Model):
         self.completed = self.status in {'completed', 'verified'}
         self.full_clean()
         super().save(*args, **kwargs)
+        self.device.sync_status_with_open_work_orders()
+
+    def delete(self, *args, **kwargs):
+        device = self.device
+        super().delete(*args, **kwargs)
+        device.sync_status_with_open_work_orders()
 
 
 class TechnicianNote(models.Model):
