@@ -459,10 +459,7 @@
                                     <th>Date</th>
                                     <th>Maintenance Type</th>
                                     <th>Technician</th>
-                                    <th>Assigned To</th>
                                     <th>Work Order Status</th>
-                                    <th>SLA</th>
-                                    <th>Attachments</th>
                                     <th>Cost</th>
                                 </tr>
                             </thead>
@@ -480,7 +477,6 @@
                                         {% endif %}
                                     </td>
                                     <td>{{ maintenance.technician }}</td>
-                                    <td>{{ maintenance.assigned_technician|default:"-" }}</td>
                                     <td>
                                         {% if maintenance.status == 'new' %}
                                         <span class="badge bg-secondary">New</span>
@@ -495,31 +491,6 @@
                                         {% else %}
                                         <span class="badge bg-dark">Verified</span>
                                         {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if maintenance.sla_deadline %}
-                                            <div>{{ maintenance.sla_deadline|date:"Y/m/d H:i" }}</div>
-                                            {% if maintenance.is_sla_breached %}
-                                            <span class="badge bg-danger">Breached</span>
-                                            {% else %}
-                                            <span class="badge bg-success">Within SLA</span>
-                                            {% endif %}
-                                        {% else %}
-                                            <span class="text-muted">-</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <div class="d-flex flex-column gap-1">
-                                            {% if maintenance.photo_attachment %}
-                                            <a href="{{ maintenance.photo_attachment.url }}" target="_blank" class="btn btn-sm btn-outline-primary">Photo</a>
-                                            {% endif %}
-                                            {% if maintenance.calibration_certificate %}
-                                            <a href="{{ maintenance.calibration_certificate.url }}" target="_blank" class="btn btn-sm btn-outline-secondary">Certificate</a>
-                                            {% endif %}
-                                            {% if not maintenance.photo_attachment and not maintenance.calibration_certificate %}
-                                            <span class="text-muted">-</span>
-                                            {% endif %}
-                                        </div>
                                     </td>
                                     <td>{{ maintenance.cost }} EGP</td>
                                 </tr>
