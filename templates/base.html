@@ -260,20 +260,12 @@ document.addEventListener('DOMContentLoaded', function() {
             <!-- Main Navigation -->
             <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
                 {% if user.is_authenticated %}
-                <!-- Control Center -->
+                <!-- Operations Cockpit -->
                 <li class="nav-item me-1">
                     <a class="nav-link d-flex align-items-center {% if request.path == '/' or request.path == '/control-center/' %}active{% endif %}" 
                     href="{% url 'control_center_dash' %}">
                         <i class="bi bi-gear-fill me-2"></i>
-                        <span class="nav-text">Control Center</span>
-                    </a>
-                </li>
-                <!-- Dashboard -->
-                <li class="nav-item me-1">
-                    <a class="nav-link d-flex align-items-center {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" 
-                       href="{% url 'dashboard' %}">
-                        <i class="bi bi-speedometer2 me-2"></i>
-                        <span class="nav-text">Dashboard</span>
+                        <span class="nav-text">Operations Cockpit</span>
                     </a>
                 </li>
                 

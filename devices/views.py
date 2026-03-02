@@ -189,94 +189,8 @@ def logout_view(request):
 
 @login_required
 def dashboard(request):
-    # =========================
-    # Device counts
-    # =========================
-    total_devices = Device.objects.count()
-    active_devices = Device.objects.filter(status='active').count()
-    maintenance_devices = Device.objects.filter(status='maintenance').count()
-    inactive_devices = Device.objects.filter(status='inactive').count()
-
-    # =========================
-    # Percentages
-    # =========================
-    active_percentage = maintenance_percentage = inactive_percentage = 0
-
-    if total_devices > 0:
-        active_percentage = (active_devices / total_devices) * 100
-        maintenance_percentage = (maintenance_devices / total_devices) * 100
-        inactive_percentage = (inactive_devices / total_devices) * 100
-
-    # =========================
-    # Departments
-    # =========================
-    total_departments = Department.objects.count()
-
-    # =========================
-    # Recent Devices
-    # =========================
-    recent_devices = Device.objects.order_by('-created_at')[:5]
-
-    # =========================
-    # Upcoming Maintenance - SORT BY CRITICALITY ONLY
-    # =========================
-    today = date.today()
-
-    devices_with_maintenance = Device.objects.filter(next_maintenance__isnull=False)
-
-    upcoming_maintenance = []
-    for device in devices_with_maintenance:
-        delta = device.next_maintenance - today
-        days = delta.days
-
-        device.days_until_maintenance = days
-        device.days_overdue = abs(days) if days < 0 else 0
-        device.is_maintenance_overdue = days < 0
-        device.is_maintenance_urgent = 0 <= days <= 3
-        device.is_maintenance_soon = 4 <= days <= 7
-
-        # ترتيب حسب الخطورة
-        if device.is_maintenance_overdue:
-            device.priority_score = 0
-        elif device.is_maintenance_urgent:
-            device.priority_score = 1
-        elif device.is_maintenance_soon:
-            device.priority_score = 2
-        else:
-            device.priority_score = 3
-
-        upcoming_maintenance.append(device)
-
-    # الترتيب النهائي
-    upcoming_maintenance.sort(key=lambda d: (d.priority_score, d.next_maintenance))
-    upcoming_maintenance = upcoming_maintenance[:10]
-
-    # Enrich objects with calculated fields
-    for device in upcoming_maintenance:
-        delta = device.next_maintenance - today
-        device.days_until_maintenance = delta.days
-        device.is_maintenance_overdue = delta.days < 0
-        device.days_overdue = abs(delta.days) if delta.days < 0 else 0
-        device.is_maintenance_urgent = 0 <= delta.days <= 3
-
-    sync_calendar(horizon_days=180)
-    upcoming_tasks = MaintenanceTask.objects.select_related("device", "template").exclude(status="completed").order_by("due_date")[:10]
-
-    context = {
-        'total_devices': total_devices,
-        'active_devices': active_devices,
-        'maintenance_devices': maintenance_devices,
-        'inactive_devices': inactive_devices,
-        'total_departments': total_departments,
-        'recent_devices': recent_devices,
-        'upcoming_maintenance': upcoming_maintenance,
-        'active_percentage': active_percentage,
-        'maintenance_percentage': maintenance_percentage,
-        'inactive_percentage': inactive_percentage,
-        'upcoming_tasks': upcoming_tasks,
-    }
-
-    return render(request, 'dashboard.html', context)
+    """Legacy dashboard endpoint now points to the unified cockpit."""
+    return redirect('control_center')
 
 
 @login_required
@@ -563,12 +477,25 @@ def set_language_view(request):
 
 @login_required
 def control_center(request):
-    """Control Center - Main operational hub after login"""
-    # Device counts
-    total_devices = Device.objects.count()
-    active_devices = Device.objects.filter(status='active').count()
-    maintenance_devices = Device.objects.filter(status='maintenance').count()
-    inactive_devices = Device.objects.filter(status='inactive').count()
+    """Unified operational cockpit with actionable hierarchy and filters."""
+    device_qs = Device.objects.select_related('department')
+
+    selected_department = request.GET.get('department', '').strip()
+    selected_device_type = request.GET.get('device_type', '').strip()
+    selected_status = request.GET.get('status', '').strip()
+
+    if selected_department:
+        device_qs = device_qs.filter(department_id=selected_department)
+    if selected_device_type:
+        device_qs = device_qs.filter(device_type=selected_device_type)
+    if selected_status:
+        device_qs = device_qs.filter(status=selected_status)
+
+    # Device counts (filtered)
+    total_devices = device_qs.count()
+    active_devices = device_qs.filter(status='active').count()
+    maintenance_devices = device_qs.filter(status='maintenance').count()
+    inactive_devices = device_qs.filter(status='inactive').count()
     
     # Critical alerts calculation
     today = date.today()
@@ -576,7 +503,7 @@ def control_center(request):
     overdue_maintenance = []
     
     # Get devices with next maintenance
-    devices_with_maintenance = Device.objects.filter(next_maintenance__isnull=False)
+    devices_with_maintenance = device_qs.filter(next_maintenance__isnull=False)
     for device in devices_with_maintenance:
         if device.next_maintenance:
             delta = device.next_maintenance - today
@@ -593,6 +520,10 @@ def control_center(request):
     
     # Departments count
     total_departments = Department.objects.count()
+
+    # Today's work metrics
+    todays_maintenance = Maintenance.objects.select_related('device').filter(date=today).order_by('-created_at')[:5]
+    devices_due_today = device_qs.filter(next_maintenance=today).count()
     
     # Recent maintenance records
     recent_maintenance = Maintenance.objects.select_related('device').order_by('-date')[:5]
@@ -628,6 +559,16 @@ def control_center(request):
         
         # Recent data
         'recent_maintenance': recent_maintenance,
+        'todays_maintenance': todays_maintenance,
+        'devices_due_today': devices_due_today,
+
+        # Filter bar
+        'departments': Department.objects.order_by('name'),
+        'device_types': Device.DEVICE_TYPE,
+        'statuses': Device.DEVICE_STATUS,
+        'selected_department': selected_department,
+        'selected_device_type': selected_device_type,
+        'selected_status': selected_status,
     }
     
     return render(request, 'control_center.html', context)
