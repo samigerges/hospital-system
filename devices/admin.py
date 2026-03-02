@@ -67,7 +67,7 @@ def create_sample_data(modeladmin, request, queryset):
 class MaintenanceInline(admin.TabularInline):
     model = Maintenance
     extra = 1
-    fields = ['maintenance_type', 'date', 'technician', 'cost', 'completed']
+    fields = ['maintenance_type', 'date', 'technician', 'assigned_technician', 'status', 'sla_deadline', 'cost', 'completed']
 
 @admin.register(Device)
 class DeviceAdmin(admin.ModelAdmin):
@@ -89,9 +89,14 @@ class DepartmentAdmin(admin.ModelAdmin):
 
 @admin.register(Maintenance)
 class MaintenanceAdmin(admin.ModelAdmin):
-    list_display = ['device', 'maintenance_type', 'date', 'technician', 'cost', 'completed']
-    list_filter = ['maintenance_type', 'completed', 'date']
-    search_fields = ['device__name', 'technician']
+    list_display = ['device', 'maintenance_type', 'date', 'technician', 'assigned_technician', 'status', 'sla_deadline', 'sla_breached', 'cost', 'completed']
+    list_filter = ['maintenance_type', 'status', 'completed', 'date']
+    search_fields = ['device__name', 'technician', 'assigned_technician']
+
+    def sla_breached(self, obj):
+        return obj.is_sla_breached
+    sla_breached.boolean = True
+    sla_breached.short_description = 'SLA Breached'
 
 admin.site.site_header = "Hospital Equipment Management System"
 admin.site.site_title = "Equipment Management"

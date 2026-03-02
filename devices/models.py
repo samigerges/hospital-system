@@ -1,4 +1,5 @@
 # devices/models.py
+from django.core.exceptions import ValidationError
 from django.db import models
 import qrcode
 from io import BytesIO
@@ -99,9 +100,10 @@ class Device(models.Model):
     
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        
+
         if not self.qr_code:
             self.generate_qr_code()
+            kwargs.pop('force_insert', None)
             super().save(*args, **kwargs)
 
 class Maintenance(models.Model):
@@ -111,14 +113,37 @@ class Maintenance(models.Model):
         ('emergency', 'Emergency Maintenance'),
         ('calibration', 'Calibration'),
     ]
+
+    WORK_ORDER_STATUS = [
+        ('new', 'New'),
+        ('assigned', 'Assigned'),
+        ('in_progress', 'In Progress'),
+        ('waiting_parts', 'Waiting Parts'),
+        ('completed', 'Completed'),
+        ('verified', 'Verified'),
+    ]
+
+    STATUS_SEQUENCE = {
+        'new': 0,
+        'assigned': 1,
+        'in_progress': 2,
+        'waiting_parts': 3,
+        'completed': 4,
+        'verified': 5,
+    }
     
     device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='maintenances', verbose_name='Device')
     maintenance_type = models.CharField(max_length=20, choices=MAINTENANCE_TYPE, verbose_name='Maintenance Type')
     date = models.DateField(default=timezone.now, verbose_name='Maintenance Date')
     technician = models.CharField(max_length=200, verbose_name='Technician')
+    assigned_technician = models.CharField(max_length=200, blank=True, verbose_name='Assigned Technician')
     cost = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Cost')
     description = models.TextField(verbose_name='Work Description')
     notes = models.TextField(blank=True, verbose_name='Notes')
+    status = models.CharField(max_length=20, choices=WORK_ORDER_STATUS, default='new', verbose_name='Work Order Status')
+    sla_deadline = models.DateTimeField(null=True, blank=True, verbose_name='SLA Deadline')
+    photo_attachment = models.FileField(upload_to='maintenance/photos/', null=True, blank=True, verbose_name='Photo Attachment')
+    calibration_certificate = models.FileField(upload_to='maintenance/calibration/', null=True, blank=True, verbose_name='Calibration Certificate')
     completed = models.BooleanField(default=True, verbose_name='Completed')
     next_maintenance_date = models.DateField(blank=True, null=True, verbose_name='Next Maintenance Date')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -130,3 +155,26 @@ class Maintenance(models.Model):
     
     def __str__(self):
         return f"Maintenance {self.device.name} - {self.date}"
+
+    @property
+    def is_sla_breached(self):
+        if not self.sla_deadline:
+            return False
+        return timezone.now() > self.sla_deadline and self.status not in {'completed', 'verified'}
+
+    def clean(self):
+        super().clean()
+        if not self.pk:
+            return
+
+        previous = Maintenance.objects.filter(pk=self.pk).values_list('status', flat=True).first()
+        if not previous:
+            return
+
+        if self.STATUS_SEQUENCE[self.status] < self.STATUS_SEQUENCE[previous]:
+            raise ValidationError({'status': 'Status cannot move backwards in the work order flow.'})
+
+    def save(self, *args, **kwargs):
+        self.completed = self.status in {'completed', 'verified'}
+        self.full_clean()
+        super().save(*args, **kwargs)

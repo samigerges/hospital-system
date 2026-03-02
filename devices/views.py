@@ -415,7 +415,7 @@ def device_detail(request, pk):
 
     # Authenticated flow: add maintenance
     if request.method == 'POST':
-        maintenance_form = MaintenanceForm(request.POST)
+        maintenance_form = MaintenanceForm(request.POST, request.FILES)
         if maintenance_form.is_valid():
             maintenance = maintenance_form.save(commit=False)
             maintenance.device = device

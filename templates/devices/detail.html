@@ -457,8 +457,11 @@
                                     <th>Date</th>
                                     <th>Maintenance Type</th>
                                     <th>Technician</th>
+                                    <th>Assigned To</th>
+                                    <th>Work Order Status</th>
+                                    <th>SLA</th>
+                                    <th>Attachments</th>
                                     <th>Cost</th>
-                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -475,14 +478,48 @@
                                         {% endif %}
                                     </td>
                                     <td>{{ maintenance.technician }}</td>
-                                    <td>{{ maintenance.cost }} EGP</td>
+                                    <td>{{ maintenance.assigned_technician|default:"-" }}</td>
                                     <td>
-                                        {% if maintenance.completed %}
+                                        {% if maintenance.status == 'new' %}
+                                        <span class="badge bg-secondary">New</span>
+                                        {% elif maintenance.status == 'assigned' %}
+                                        <span class="badge bg-primary">Assigned</span>
+                                        {% elif maintenance.status == 'in_progress' %}
+                                        <span class="badge bg-warning text-dark">In Progress</span>
+                                        {% elif maintenance.status == 'waiting_parts' %}
+                                        <span class="badge bg-info">Waiting Parts</span>
+                                        {% elif maintenance.status == 'completed' %}
                                         <span class="badge bg-success">Completed</span>
                                         {% else %}
-                                        <span class="badge bg-warning">In Progress</span>
+                                        <span class="badge bg-dark">Verified</span>
                                         {% endif %}
                                     </td>
+                                    <td>
+                                        {% if maintenance.sla_deadline %}
+                                            <div>{{ maintenance.sla_deadline|date:"Y/m/d H:i" }}</div>
+                                            {% if maintenance.is_sla_breached %}
+                                            <span class="badge bg-danger">Breached</span>
+                                            {% else %}
+                                            <span class="badge bg-success">Within SLA</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-column gap-1">
+                                            {% if maintenance.photo_attachment %}
+                                            <a href="{{ maintenance.photo_attachment.url }}" target="_blank" class="btn btn-sm btn-outline-primary">Photo</a>
+                                            {% endif %}
+                                            {% if maintenance.calibration_certificate %}
+                                            <a href="{{ maintenance.calibration_certificate.url }}" target="_blank" class="btn btn-sm btn-outline-secondary">Certificate</a>
+                                            {% endif %}
+                                            {% if not maintenance.photo_attachment and not maintenance.calibration_certificate %}
+                                            <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>{{ maintenance.cost }} EGP</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -600,7 +637,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form method="post" id="maintenanceForm">
+                    <form method="post" id="maintenanceForm" enctype="multipart/form-data">
                         {% csrf_token %}
                         {{ maintenance_form|crispy }}
                     </form>
