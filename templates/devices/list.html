@@ -24,8 +24,8 @@
 </div>
 
 <!-- Statistics Cards -->
-<div class="row g-3 mb-4">
-    <div class="col-6 col-md-4 col-lg-2">
+<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-5 g-3 mb-4">
+    <div class="col">
         <a href="{{ clear_status_url }}" class="text-decoration-none">
             <div class="card stat-card border-0 shadow-sm h-100 hover-lift theme-transition {% if not request.GET.status %}stat-card-active{% endif %}">
                 <div class="card-body p-3 text-center">
@@ -41,7 +41,7 @@
     </div>
 
     {% for kpi in status_kpis %}
-    <div class="col-6 col-md-4 col-lg-2">
+    <div class="col">
         <a href="{{ kpi.url }}" class="text-decoration-none">
             <div class="card stat-card border-0 shadow-sm h-100 hover-lift theme-transition {% if kpi.is_selected %}stat-card-active{% endif %}">
                 <div class="card-body p-3 text-center">

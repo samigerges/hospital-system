@@ -46,7 +46,7 @@ class DepartmentForm(forms.ModelForm):
 class MaintenanceForm(forms.ModelForm):
     class Meta:
         model = Maintenance
-        fields = '__all__'
+        exclude = ['assigned_technician', 'sla_deadline', 'photo_attachment', 'calibration_certificate']
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'next_maintenance_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
