@@ -8,6 +8,24 @@ body {
     color: var(--text-primary);
 }
 
+:root {
+    --theme-primary: #0f4c81;
+    --theme-primary-rgb: 15, 76, 129;
+    --theme-secondary: #14b8a6;
+    --theme-secondary-rgb: 20, 184, 166;
+    --theme-surface: #f4f8fc;
+    --theme-border: #d9e4ef;
+}
+
+[data-bs-theme="dark"] {
+    --theme-primary: #3b82c4;
+    --theme-primary-rgb: 59, 130, 196;
+    --theme-secondary: #2dd4bf;
+    --theme-secondary-rgb: 45, 212, 191;
+    --theme-surface: #0f172a;
+    --theme-border: #334155;
+}
+
 /* ============================= */
 /* Cards */
 /* ============================= */
@@ -29,6 +47,29 @@ body {
 
 .btn {
     transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: var(--theme-primary);
+    border-color: var(--theme-primary);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: #0b3e6a;
+    border-color: #0b3e6a;
+}
+
+.btn-outline-primary {
+    color: var(--theme-primary);
+    border-color: var(--theme-primary);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    color: #fff;
+    background-color: var(--theme-primary);
+    border-color: var(--theme-primary);
 }
 
 .btn:hover {
@@ -100,6 +141,11 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 2px 4px rgba(0,0,0,.1);
 }
 
+.navbar .nav-link.active,
+.navbar .nav-link:hover {
+    color: var(--theme-secondary) !important;
+}
+
 /* ============================= */
 /* Modals */
 /* ============================= */
@@ -116,6 +162,10 @@ h1, h2, h3, h4, h5, h6 {
 .badge {
     font-weight: 500;
     letter-spacing: 0.4px;
+}
+
+.badge.bg-primary {
+    background-color: var(--theme-primary) !important;
 }
 
 /* ============================= */
@@ -156,9 +206,16 @@ h1, h2, h3, h4, h5, h6 {
 /* ============================= */
 
 .form-control:focus {
-    border-color: var(--app-primary);
-    box-shadow: 0 0 0 0.2rem rgba(var(--app-primary-rgb), 0.25);
-} 
+    border-color: var(--theme-primary);
+    box-shadow: 0 0 0 0.2rem rgba(var(--theme-primary-rgb), 0.25);
+}
+
+.card,
+.table,
+.list-group-item,
+.modal-content {
+    border-color: var(--theme-border);
+}
 
 /* ============================= */
 /* Footer */
