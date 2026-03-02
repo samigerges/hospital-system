@@ -25,61 +25,49 @@
 
 <!-- Statistics Cards -->
 <div class="row g-3 mb-4">
-    <!-- Total Devices -->
-    <div class="col-md-3">
-        <div class="card stat-card border-0 shadow-sm h-100 hover-lift theme-transition">
-            <div class="card-body p-3 text-center">
-                <div class="icon-stat bg-primary text-white rounded-circle mx-auto mb-3">
-                    <i class="bi bi-cpu-fill fs-4"></i>
+    <div class="col-6 col-md-4 col-lg-2">
+        <a href="{{ clear_status_url }}" class="text-decoration-none">
+            <div class="card stat-card border-0 shadow-sm h-100 hover-lift theme-transition {% if not request.GET.status %}stat-card-active{% endif %}">
+                <div class="card-body p-3 text-center">
+                    <div class="icon-stat bg-primary text-white rounded-circle mx-auto mb-3">
+                        <i class="bi bi-cpu-fill fs-4"></i>
+                    </div>
+                    <h3 class="mb-0 fw-bold">{{ total_devices }}</h3>
+                    <p class="fw-semibold mb-1">All Devices</p>
+                    <small class="text-muted">Clear status filter</small>
                 </div>
-                <h3 class="mb-0 fw-bold">{{ devices.count }}</h3>
-                <p class="fw-semibold mb-1">Total Devices</p>
-                <small class="text-muted">All registered equipment</small>
             </div>
-        </div>
+        </a>
     </div>
 
-    <!-- Active Devices -->
-    <div class="col-md-3">
-        <div class="card stat-card border-0 shadow-sm h-100 hover-lift theme-transition">
-            <div class="card-body p-3 text-center">
-                <div class="icon-stat bg-success text-white rounded-circle mx-auto mb-3">
-                    <i class="bi bi-check-circle-fill fs-4"></i>
+    {% for kpi in status_kpis %}
+    <div class="col-6 col-md-4 col-lg-2">
+        <a href="{{ kpi.url }}" class="text-decoration-none">
+            <div class="card stat-card border-0 shadow-sm h-100 hover-lift theme-transition {% if kpi.is_selected %}stat-card-active{% endif %}">
+                <div class="card-body p-3 text-center">
+                    <div class="icon-stat text-white rounded-circle mx-auto mb-3
+                        {% if kpi.value == 'active' %}bg-success
+                        {% elif kpi.value == 'maintenance' %}bg-warning
+                        {% elif kpi.value == 'retired' %}bg-danger
+                        {% else %}bg-secondary{% endif %}">
+                        {% if kpi.value == 'active' %}
+                            <i class="bi bi-check-circle-fill fs-4"></i>
+                        {% elif kpi.value == 'maintenance' %}
+                            <i class="bi bi-tools fs-4"></i>
+                        {% elif kpi.value == 'retired' %}
+                            <i class="bi bi-archive-fill fs-4"></i>
+                        {% else %}
+                            <i class="bi bi-pause-circle-fill fs-4"></i>
+                        {% endif %}
+                    </div>
+                    <h3 class="mb-0 fw-bold">{{ kpi.count }}</h3>
+                    <p class="fw-semibold mb-1">{{ kpi.label }}</p>
+                    <small class="text-muted">Click to filter</small>
                 </div>
-                <h3 class="mb-0 fw-bold">{{ active_devices }}</h3>
-                <p class="fw-semibold mb-1">Active Devices</p>
-                <small class="text-muted">Operating normally</small>
             </div>
-        </div>
+        </a>
     </div>
-
-    <!-- Under Maintenance -->
-    <div class="col-md-3">
-        <div class="card stat-card border-0 shadow-sm h-100 hover-lift theme-transition">
-            <div class="card-body p-3 text-center">
-                <div class="icon-stat bg-warning text-white rounded-circle mx-auto mb-3">
-                    <i class="bi bi-tools fs-4"></i>
-                </div>
-                <h3 class="mb-0 fw-bold">{{ maintenance_devices }}</h3>
-                <p class="fw-semibold mb-1">Under Maintenance</p>
-                <small class="text-muted">Need attention</small>
-            </div>
-        </div>
-    </div>
-
-    <!-- QR Codes -->
-    <div class="col-md-3">
-        <div class="card stat-card border-0 shadow-sm h-100 hover-lift theme-transition">
-            <div class="card-body p-3 text-center">
-                <div class="icon-stat bg-info text-white rounded-circle mx-auto mb-3">
-                    <i class="bi bi-qr-code-scan fs-4"></i>
-                </div>
-                <h3 class="mb-0 fw-bold">{{ devices.count }}</h3>
-                <p class="fw-semibold mb-1">QR Codes</p>
-                <small class="text-muted">All devices have QR</small>
-            </div>
-        </div>
-    </div>
+    {% endfor %}
 </div>
 
 <!-- Filters and Search -->
@@ -447,6 +435,15 @@
     transform: translateY(-8px);
     box-shadow: var(--shadow-lg) !important;
     border-color: var(--border-medium);
+}
+
+.stat-card-active {
+    border: 2px solid var(--app-primary) !important;
+    box-shadow: 0 8px 20px rgba(var(--app-primary-rgb), 0.2) !important;
+}
+
+.stat-card-active::before {
+    opacity: 1;
 }
 
 .stat-card .card-body {

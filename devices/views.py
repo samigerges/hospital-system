@@ -253,37 +253,52 @@ def dashboard(request):
 
 @login_required
 def device_list(request):
-    devices = Device.objects.all().order_by('-created_at')
+    devices_base = Device.objects.all().order_by('-created_at')
 
     status_filter = request.GET.get('status')
     department_filter = request.GET.get('department')
     search_query = request.GET.get('search')
 
-    if status_filter:
-        devices = devices.filter(status=status_filter)
     if department_filter:
-        devices = devices.filter(department_id=department_filter)
+        devices_base = devices_base.filter(department_id=department_filter)
     if search_query:
-        devices = devices.filter(
+        devices_base = devices_base.filter(
             Q(name__icontains=search_query) |
             Q(device_id__icontains=search_query) |
             Q(serial_number__icontains=search_query)
         )
 
+    devices = devices_base
+    if status_filter:
+        devices = devices.filter(status=status_filter)
+
     departments = Department.objects.all()
 
-    # Counters
-    active_devices = devices.filter(status='active').count()
-    maintenance_devices = devices.filter(status='maintenance').count()
-    inactive_devices = devices.exclude(status__in=['active', 'maintenance']).count()
+    status_kpis = []
+    base_params = request.GET.copy()
+    if 'status' in base_params:
+        del base_params['status']
+
+    clear_status_url = f"?{base_params.urlencode()}" if base_params.urlencode() else '?'
+
+    for value, label in Device.DEVICE_STATUS:
+        params = base_params.copy()
+        params['status'] = value
+        status_kpis.append({
+            'value': value,
+            'label': label,
+            'count': devices_base.filter(status=value).count(),
+            'url': f"?{params.urlencode()}",
+            'is_selected': status_filter == value,
+        })
 
     context = {
         'devices': devices,
         'departments': departments,
         'status_choices': Device.DEVICE_STATUS,
-        'active_devices': active_devices,
-        'maintenance_devices': maintenance_devices,
-        'inactive_devices': inactive_devices,
+        'status_kpis': status_kpis,
+        'total_devices': devices_base.count(),
+        'clear_status_url': clear_status_url,
     }
 
     return render(request, 'devices/list.html', context)

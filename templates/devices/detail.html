@@ -441,7 +441,12 @@
             <!-- Maintenance History -->
             <div class="card shadow">
                 <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <h5 class="mb-0"><i class="bi bi-tools"></i> Maintenance History</h5>
+                    <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addMaintenanceModal">
+                        <i class="bi bi-plus-circle"></i> Add Maintenance
+                    </button>
+                </div>
                 </div>
                 <div class="card-body">
                     {% if maintenances %}
@@ -504,7 +509,7 @@
                 <div class="card-body text-center">
                     {% if device.qr_code %}
                     <div class="mb-3">
-                        <img src="{{ device.qr_code.url }}" alt="QR Code" class="img-fluid" style="max-width: 250px;">
+                        <img src="{{ device.qr_code.url }}" alt="QR Code" class="img-fluid" style="max-width: 170px;">
                     </div>
                     <p class="text-muted mb-2"><strong>Device ID:</strong> {{ device.device_id }}</p>
                     <p class="text-muted mb-3">This code can be scanned to directly access this page</p>
@@ -583,44 +588,30 @@
                 </div>
             </div>
 
-            <!-- Add Maintenance -->
-            <div class="card shadow">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-plus-circle"></i> Add Maintenance Record</h5>
+        </div>
+    </div>
+
+    <!-- Add Maintenance Modal -->
+    <div class="modal fade" id="addMaintenanceModal" tabindex="-1" aria-labelledby="addMaintenanceModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addMaintenanceModalLabel"><i class="bi bi-plus-circle"></i> Add Maintenance Record</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="card-body">
-                    <form method="post">
+                <div class="modal-body">
+                    <form method="post" id="maintenanceForm">
                         {% csrf_token %}
                         {{ maintenance_form|crispy }}
-                        <div class="d-grid mt-3">
-                            <button type="submit" class="btn btn-success">
-                                <i class="bi bi-save"></i> Save Maintenance Record
-                            </button>
-                        </div>
                     </form>
                 </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="card shadow mt-4">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-lightning"></i> Quick Actions</h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="{% url 'device_edit' device.pk %}" class="btn btn-warning">
-                            <i class="bi bi-pencil"></i> Edit Device
-                        </a>
-                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                            <i class="bi bi-trash"></i> Delete Device
-                        </button>
-                        <a href="{% url 'device_list' %}" class="btn btn-secondary">
-                            <i class="bi bi-list"></i> View All Devices
-                        </a>
-                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" form="maintenanceForm" class="btn btn-success">
+                        <i class="bi bi-save"></i> Save Maintenance Record
+                    </button>
                 </div>
             </div>
-
         </div>
     </div>
 
