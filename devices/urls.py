@@ -76,6 +76,7 @@ urlpatterns = [
     
     # API للبحث السريع عن جهاز
     path('devices/api/lookup/', views.device_lookup_api, name='device_lookup_api'),
+    path('maintenance/api/calendar/', views.maintenance_calendar_api, name='maintenance_calendar_api'),
     
     # URL لعرض QR Code كصورة
     path('devices/<int:pk>/qr.png', views.device_qr, name='device_qr'),

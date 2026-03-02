@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.contrib import messages
 from django.utils import timezone
 from datetime import timedelta
-from .models import Device, Department, Maintenance
+from .models import Device, Department, Maintenance, PMTemplate, MaintenanceTask
 
 @admin.action(description="Add sample data")
 def create_sample_data(modeladmin, request, queryset):
@@ -101,3 +101,17 @@ class MaintenanceAdmin(admin.ModelAdmin):
 admin.site.site_header = "Hospital Equipment Management System"
 admin.site.site_title = "Equipment Management"
 admin.site.index_title = "Welcome to Control Panel"
+
+
+@admin.register(PMTemplate)
+class PMTemplateAdmin(admin.ModelAdmin):
+    list_display = ['name', 'device_type', 'manufacturer', 'model', 'interval_days', 'reminder_days_before', 'is_active']
+    list_filter = ['device_type', 'manufacturer', 'is_active']
+    search_fields = ['name', 'manufacturer', 'model']
+
+
+@admin.register(MaintenanceTask)
+class MaintenanceTaskAdmin(admin.ModelAdmin):
+    list_display = ['device', 'template', 'due_date', 'reminder_date', 'status', 'urgency']
+    list_filter = ['status', 'urgency', 'due_date', 'template']
+    search_fields = ['device__device_id', 'device__name', 'template__name']

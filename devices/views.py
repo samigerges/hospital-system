@@ -14,8 +14,9 @@ from django.views.decorators.http import require_GET
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 
-from .models import Device, Department, Maintenance
+from .models import Device, Department, Maintenance, MaintenanceTask
 from .forms import LoginForm, DeviceForm, DepartmentForm, MaintenanceForm
+from .scheduling import sync_calendar
 
 from .utils.prediction import compute_failure_prediction
 
@@ -81,6 +82,28 @@ def device_lookup_api(request):
         "pk": device.pk,
         "url": f"/devices/{device.pk}/",  # لو عندك path name استخدم reverse أفضل
     })
+
+
+@require_GET
+@login_required
+def maintenance_calendar_api(request):
+    sync_calendar(horizon_days=180)
+    today = timezone.now().date()
+
+    tasks = MaintenanceTask.objects.select_related("device", "template").order_by("due_date")[:200]
+    events = []
+    for task in tasks:
+        events.append({
+            "id": task.id,
+            "title": f"{task.device.name} • {task.template.name}",
+            "date": task.due_date.isoformat(),
+            "status": task.status,
+            "urgency": task.urgency,
+            "reminder_date": task.reminder_date.isoformat(),
+            "is_overdue": task.due_date < today and task.status != "completed",
+        })
+
+    return JsonResponse({"events": events, "count": len(events)})
 
 
 def devices_export_excel(request):
@@ -235,6 +258,9 @@ def dashboard(request):
         device.days_overdue = abs(delta.days) if delta.days < 0 else 0
         device.is_maintenance_urgent = 0 <= delta.days <= 3
 
+    sync_calendar(horizon_days=180)
+    upcoming_tasks = MaintenanceTask.objects.select_related("device", "template").exclude(status="completed").order_by("due_date")[:10]
+
     context = {
         'total_devices': total_devices,
         'active_devices': active_devices,
@@ -246,6 +272,7 @@ def dashboard(request):
         'active_percentage': active_percentage,
         'maintenance_percentage': maintenance_percentage,
         'inactive_percentage': inactive_percentage,
+        'upcoming_tasks': upcoming_tasks,
     }
 
     return render(request, 'dashboard.html', context)
