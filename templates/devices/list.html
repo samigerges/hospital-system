@@ -116,6 +116,12 @@
                 </div>
             </div>
         </form>
+        <div class="mt-3 small text-muted d-flex flex-wrap gap-3">
+            <span><i class="bi bi-keyboard me-1"></i><strong>Shortcuts:</strong></span>
+            <span><kbd>/</kbd> Search</span>
+            <span><kbd>Alt</kbd>+<kbd>T</kbd> Toggle theme</span>
+            <span><kbd>Alt</kbd>+<kbd>2</kbd> Devices</span>
+        </div>
         
         {% if request.GET.search or request.GET.status or request.GET.department %}
         <div class="mt-3 pt-3 border-top border-light">
@@ -172,7 +178,7 @@
                         <th class="fw-semibold">Type</th>
                         <th class="fw-semibold">Department</th>
                         <th class="fw-semibold">Status</th>
-                        <th class="text-end pe-3 fw-semibold" style="width: 150px;">Actions</th>
+                        <th class="text-end pe-3 fw-semibold" style="width: 180px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -232,24 +238,24 @@
                         <!-- Status -->
                         <td>
                             {% if device.status == 'active' %}
-                            <span class="badge bg-success text-white rounded-pill">
-                                <i class="bi bi-check-circle me-1"></i>
-                                {{ device.get_status_display }}
+                            <span class="status-indicator bg-success text-white" title="Active status" aria-label="Status: Active">
+                                <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+                                <span>{{ device.get_status_display }}</span>
                             </span>
                             {% elif device.status == 'maintenance' %}
-                            <span class="badge bg-warning text-white rounded-pill">
-                                <i class="bi bi-tools me-1"></i>
-                                {{ device.get_status_display }}
+                            <span class="status-indicator bg-warning text-dark" title="Maintenance status" aria-label="Status: Maintenance">
+                                <i class="bi bi-tools" aria-hidden="true"></i>
+                                <span>{{ device.get_status_display }}</span>
                             </span>
                             {% elif device.status == 'inactive' %}
-                            <span class="badge bg-danger text-white rounded-pill">
-                                <i class="bi bi-x-circle me-1"></i>
-                                {{ device.get_status_display }}
+                            <span class="status-indicator bg-danger text-white" title="Inactive status" aria-label="Status: Inactive">
+                                <i class="bi bi-x-circle-fill" aria-hidden="true"></i>
+                                <span>{{ device.get_status_display }}</span>
                             </span>
                             {% else %}
-                            <span class="badge bg-secondary text-white rounded-pill">
-                                <i class="bi bi-question-circle me-1"></i>
-                                {{ device.get_status_display }}
+                            <span class="status-indicator bg-secondary text-white" title="Unknown status" aria-label="Status: Unknown">
+                                <i class="bi bi-question-circle-fill" aria-hidden="true"></i>
+                                <span>{{ device.get_status_display }}</span>
                             </span>
                             {% endif %}
                         </td>
@@ -558,6 +564,27 @@
     transform: scale(1.08) rotate(2deg);
     box-shadow: 0 6px 12px rgba(var(--app-primary-rgb), 0.2);
     cursor: pointer;
+}
+
+kbd {
+    background: rgba(var(--app-primary-rgb), 0.12);
+    color: var(--text-primary);
+    border: 1px solid var(--border-light);
+    border-bottom-width: 2px;
+    border-radius: 6px;
+    padding: 0.1rem 0.35rem;
+}
+
+@media (min-width: 768px) and (max-width: 1366px), (pointer: coarse) {
+    .table .btn,
+    .table .status-indicator,
+    .table .qr-image {
+        min-height: 48px;
+    }
+
+    .table .btn {
+        min-width: 48px;
+    }
 }
 
 /* Table responsive adjustments */

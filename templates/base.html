@@ -52,11 +52,11 @@
 
     [data-bs-theme="dark"] {
         --bg-primary: #09090f;
-        --bg-surface: #131320;
-        --bg-muted: #1b1b2b;
+        --bg-surface: #171726;
+        --bg-muted: #232338;
         --text-primary: #f8f7ff;
-        --text-secondary: #bdb6db;
-        --border-color: #2c2c44;
+        --text-secondary: #d6d2eb;
+        --border-color: #3a3a58;
         --shadow-soft: 0 20px 40px rgba(0, 0, 0, 0.45);
     }
 
@@ -89,6 +89,9 @@
     .nav-link {
         border-radius: 999px;
         transition: all 0.25s ease;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
     }
 
     .nav-link:hover,
@@ -111,6 +114,47 @@
         border: 1px solid var(--border-color) !important;
         border-radius: 1rem;
         box-shadow: var(--shadow-soft);
+    }
+
+    [data-bs-theme="dark"] .dropdown-item {
+        color: var(--text-primary);
+    }
+
+    [data-bs-theme="dark"] .dropdown-item:hover,
+    [data-bs-theme="dark"] .dropdown-item:focus {
+        background: rgba(var(--app-primary-rgb), 0.2);
+        color: #fff;
+    }
+
+    .status-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border-radius: 999px;
+        padding: 0.4rem 0.7rem;
+        font-weight: 600;
+    }
+
+    .status-indicator i {
+        font-size: 0.9rem;
+    }
+
+    @media (min-width: 768px) and (max-width: 1366px), (pointer: coarse) {
+        .btn,
+        .form-control,
+        .form-select,
+        .dropdown-item,
+        .nav-link,
+        .page-link,
+        .theme-switch-label {
+            min-height: 48px;
+            padding-top: 0.65rem;
+            padding-bottom: 0.65rem;
+        }
+
+        .btn-group > .btn {
+            min-width: 48px;
+        }
     }
 
     .table {
@@ -339,13 +383,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             <h6 class="dropdown-header">Account</h6>
                         </li>
                             <!-- في base.html -->
-                            <li class="nav-item me-1">
-                                <a class="nav-link d-flex align-items-center {% if request.resolver_match.url_name == 'team_profile' %}active{% endif %}" 
-                                href="{% url 'team_profile' %}">
-                                    <i class="bi bi-people me-2"></i>
-                                    <span class="nav-text">Team</span>
-                                </a>
-                            </li>                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center {% if request.resolver_match.url_name == 'team_profile' %}active{% endif %}" 
+                               href="{% url 'team_profile' %}">
+                                <i class="bi bi-people me-2"></i>
+                                <span>Team</span>
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
                         <li>
                             <a class="dropdown-item d-flex align-items-center" href="{% url 'admin:index' %}" target="_blank">
                                 <i class="bi bi-shield-check me-2"></i>
@@ -530,6 +575,51 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         lastScrollTop = scrollTop;
+    });
+
+    // Keyboard shortcuts (skip while typing)
+    const shortcuts = {
+        'Alt+1': "{% url 'control_center_dash' %}",
+        'Alt+2': "{% url 'device_list' %}",
+        'Alt+3': "{% url 'departments_list' %}",
+        'Alt+4': "{% url 'team_profile' %}",
+        'Alt+5': "{% url 'procurement_dashboard' %}"
+    };
+
+    document.addEventListener('keydown', function(event) {
+        const target = event.target;
+        const isTyping = target && (
+            target.tagName === 'INPUT' ||
+            target.tagName === 'TEXTAREA' ||
+            target.tagName === 'SELECT' ||
+            target.isContentEditable
+        );
+
+        if (isTyping) {
+            return;
+        }
+
+        if (event.altKey && event.key.toLowerCase() === 't') {
+            event.preventDefault();
+            themeSwitch.click();
+            return;
+        }
+
+        if (event.key === '/') {
+            const searchInput = document.querySelector('input[type="search"], input[name="search"], #search');
+            if (searchInput) {
+                event.preventDefault();
+                searchInput.focus();
+                searchInput.select();
+            }
+            return;
+        }
+
+        const combo = `${event.altKey ? 'Alt+' : ''}${event.key}`;
+        if (shortcuts[combo]) {
+            event.preventDefault();
+            window.location.href = shortcuts[combo];
+        }
     });
 });
 </script>
