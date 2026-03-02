@@ -1,65 +1,71 @@
-from datetime import date, timedelta
+from datetime import timedelta
 
+from django.core.exceptions import ValidationError
 from django.test import TestCase
+from django.utils import timezone
 
-from .models import Department, Device, PMTemplate, MaintenanceTask
-from .scheduling import schedule_device_tasks, refresh_all_task_statuses
+from .models import Department, Device, Maintenance
 
 
-class SchedulingEngineTests(TestCase):
+class MaintenanceWorkOrderTests(TestCase):
     def setUp(self):
         self.department = Department.objects.create(name='ICU', floor=1)
         self.device = Device.objects.create(
-            name='Patient Monitor',
-            device_id='MON-900',
-            serial_number='SER-900',
+            name='Monitor',
+            device_id='MON-100',
+            serial_number='SER-100',
             device_type='monitor',
-            manufacturer='Philips',
-            model='MX450',
-            purchase_date=date.today() - timedelta(days=500),
-            warranty_expiry=date.today() + timedelta(days=500),
-            price=1000,
+            manufacturer='Acme',
+            model='A1',
+            purchase_date=timezone.now().date(),
+            warranty_expiry=timezone.now().date() + timedelta(days=365),
+            price='1000.00',
             status='active',
             department=self.department,
-            location='ICU',
-            next_maintenance=date.today() + timedelta(days=5),
+            location='Room 1',
         )
 
-    def test_template_matching_and_task_generation(self):
-        PMTemplate.objects.create(
-            name='Generic Monitor PM',
-            device_type='monitor',
-            interval_days=30,
-            reminder_days_before=5,
-        )
-        PMTemplate.objects.create(
-            name='Philips MX450 PM',
-            device_type='monitor',
-            manufacturer='Philips',
-            model='MX450',
-            interval_days=30,
-            reminder_days_before=10,
-        )
-
-        created = schedule_device_tasks(self.device, horizon_days=65, reference_date=date.today())
-        self.assertEqual(len(created), 3)
-        self.assertTrue(MaintenanceTask.objects.filter(template__name='Philips MX450 PM').exists())
-
-    def test_urgency_refresh(self):
-        template = PMTemplate.objects.create(
-            name='Ventilator PM',
-            device_type='monitor',
-            interval_days=90,
-            reminder_days_before=7,
-        )
-        task = MaintenanceTask.objects.create(
+    def test_completed_flag_tracks_status(self):
+        maintenance = Maintenance.objects.create(
             device=self.device,
-            template=template,
-            due_date=date.today() - timedelta(days=1),
-            reminder_date=date.today() - timedelta(days=8),
+            maintenance_type='corrective',
+            technician='Tech 1',
+            assigned_technician='Tech 2',
+            description='Fix issue',
+            status='in_progress',
+        )
+        self.assertFalse(maintenance.completed)
+
+        maintenance.status = 'completed'
+        maintenance.save()
+        self.assertTrue(maintenance.completed)
+
+    def test_status_cannot_move_backwards(self):
+        maintenance = Maintenance.objects.create(
+            device=self.device,
+            maintenance_type='corrective',
+            technician='Tech 1',
+            assigned_technician='Tech 2',
+            description='Fix issue',
+            status='in_progress',
         )
 
-        refresh_all_task_statuses(reference_date=date.today())
-        task.refresh_from_db()
-        self.assertEqual(task.status, 'overdue')
-        self.assertEqual(task.urgency, 'overdue')
+        maintenance.status = 'assigned'
+        with self.assertRaises(ValidationError):
+            maintenance.save()
+
+    def test_sla_breach_indicator(self):
+        maintenance = Maintenance.objects.create(
+            device=self.device,
+            maintenance_type='preventive',
+            technician='Tech 1',
+            assigned_technician='Tech 2',
+            description='Routine',
+            status='assigned',
+            sla_deadline=timezone.now() - timedelta(hours=2),
+        )
+        self.assertTrue(maintenance.is_sla_breached)
+
+        maintenance.status = 'verified'
+        maintenance.save()
+        self.assertFalse(maintenance.is_sla_breached)

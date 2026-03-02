@@ -45,6 +45,9 @@ class MaintenanceForm(forms.ModelForm):
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'next_maintenance_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'sla_deadline': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+            'photo_attachment': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'calibration_certificate': forms.ClearableFileInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
             'notes': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
         }

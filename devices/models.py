@@ -1,6 +1,5 @@
 # devices/models.py
-from datetime import timedelta
-
+from django.core.exceptions import ValidationError
 from django.db import models
 import qrcode
 from io import BytesIO
@@ -104,7 +103,8 @@ class Device(models.Model):
 
         if not self.qr_code:
             self.generate_qr_code()
-            super().save(update_fields=['qr_code'])
+            kwargs.pop('force_insert', None)
+            super().save(*args, **kwargs)
 
 class Maintenance(models.Model):
     MAINTENANCE_TYPE = [
@@ -113,14 +113,37 @@ class Maintenance(models.Model):
         ('emergency', 'Emergency Maintenance'),
         ('calibration', 'Calibration'),
     ]
+
+    WORK_ORDER_STATUS = [
+        ('new', 'New'),
+        ('assigned', 'Assigned'),
+        ('in_progress', 'In Progress'),
+        ('waiting_parts', 'Waiting Parts'),
+        ('completed', 'Completed'),
+        ('verified', 'Verified'),
+    ]
+
+    STATUS_SEQUENCE = {
+        'new': 0,
+        'assigned': 1,
+        'in_progress': 2,
+        'waiting_parts': 3,
+        'completed': 4,
+        'verified': 5,
+    }
     
     device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='maintenances', verbose_name='Device')
     maintenance_type = models.CharField(max_length=20, choices=MAINTENANCE_TYPE, verbose_name='Maintenance Type')
     date = models.DateField(default=timezone.now, verbose_name='Maintenance Date')
     technician = models.CharField(max_length=200, verbose_name='Technician')
+    assigned_technician = models.CharField(max_length=200, blank=True, verbose_name='Assigned Technician')
     cost = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Cost')
     description = models.TextField(verbose_name='Work Description')
     notes = models.TextField(blank=True, verbose_name='Notes')
+    status = models.CharField(max_length=20, choices=WORK_ORDER_STATUS, default='new', verbose_name='Work Order Status')
+    sla_deadline = models.DateTimeField(null=True, blank=True, verbose_name='SLA Deadline')
+    photo_attachment = models.FileField(upload_to='maintenance/photos/', null=True, blank=True, verbose_name='Photo Attachment')
+    calibration_certificate = models.FileField(upload_to='maintenance/calibration/', null=True, blank=True, verbose_name='Calibration Certificate')
     completed = models.BooleanField(default=True, verbose_name='Completed')
     next_maintenance_date = models.DateField(blank=True, null=True, verbose_name='Next Maintenance Date')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -133,93 +156,25 @@ class Maintenance(models.Model):
     def __str__(self):
         return f"Maintenance {self.device.name} - {self.date}"
 
+    @property
+    def is_sla_breached(self):
+        if not self.sla_deadline:
+            return False
+        return timezone.now() > self.sla_deadline and self.status not in {'completed', 'verified'}
 
-class PMTemplate(models.Model):
-    """Recurring preventive-maintenance template matched by device attributes."""
-
-    MAINTENANCE_TYPE = Maintenance.MAINTENANCE_TYPE
-
-    name = models.CharField(max_length=200)
-    maintenance_type = models.CharField(max_length=20, choices=MAINTENANCE_TYPE, default='preventive')
-    device_type = models.CharField(max_length=50, choices=Device.DEVICE_TYPE)
-    manufacturer = models.CharField(max_length=200, blank=True)
-    model = models.CharField(max_length=200, blank=True)
-    interval_days = models.PositiveIntegerField(default=90)
-    reminder_days_before = models.PositiveIntegerField(default=7)
-    is_active = models.BooleanField(default=True)
-    notes = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ['device_type', 'manufacturer', 'model', 'name']
-
-    def __str__(self):
-        target = f"{self.get_device_type_display()}"
-        if self.manufacturer:
-            target += f" / {self.manufacturer}"
-        if self.model:
-            target += f" / {self.model}"
-        return f"{self.name} ({target})"
-
-
-class MaintenanceTask(models.Model):
-    """Auto-generated PM task from template/device pair."""
-
-    STATUS_CHOICES = [
-        ('scheduled', 'Scheduled'),
-        ('due', 'Due Now'),
-        ('overdue', 'Overdue'),
-        ('completed', 'Completed'),
-        ('cancelled', 'Cancelled'),
-    ]
-
-    URGENCY_CHOICES = [
-        ('normal', 'Normal'),
-        ('soon', 'Due Soon'),
-        ('urgent', 'Urgent'),
-        ('overdue', 'Overdue'),
-    ]
-
-    device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='maintenance_tasks')
-    template = models.ForeignKey(PMTemplate, on_delete=models.CASCADE, related_name='maintenance_tasks')
-    due_date = models.DateField()
-    reminder_date = models.DateField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='scheduled')
-    urgency = models.CharField(max_length=20, choices=URGENCY_CHOICES, default='normal')
-    source_maintenance = models.ForeignKey(Maintenance, on_delete=models.SET_NULL, null=True, blank=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
-    notes = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ['due_date', 'urgency']
-        unique_together = ('device', 'template', 'due_date')
-
-    def __str__(self):
-        return f"{self.device.device_id} / {self.template.name} / {self.due_date}"
-
-    def refresh_status(self, reference_date=None):
-        if self.status in {'completed', 'cancelled'}:
+    def clean(self):
+        super().clean()
+        if not self.pk:
             return
 
-        reference_date = reference_date or timezone.now().date()
-        days = (self.due_date - reference_date).days
+        previous = Maintenance.objects.filter(pk=self.pk).values_list('status', flat=True).first()
+        if not previous:
+            return
 
-        if days < 0:
-            self.status = 'overdue'
-            self.urgency = 'overdue'
-        elif days <= 3:
-            self.status = 'due'
-            self.urgency = 'urgent'
-        elif days <= 7:
-            self.status = 'scheduled'
-            self.urgency = 'soon'
-        else:
-            self.status = 'scheduled'
-            self.urgency = 'normal'
+        if self.STATUS_SEQUENCE[self.status] < self.STATUS_SEQUENCE[previous]:
+            raise ValidationError({'status': 'Status cannot move backwards in the work order flow.'})
 
-    @property
-    def next_due_date(self):
-        return self.due_date + timedelta(days=self.template.interval_days)
+    def save(self, *args, **kwargs):
+        self.completed = self.status in {'completed', 'verified'}
+        self.full_clean()
+        super().save(*args, **kwargs)
