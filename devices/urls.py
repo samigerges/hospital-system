@@ -58,6 +58,15 @@ urlpatterns = [
     # حذف قسم
     path('departments/<int:pk>/delete/', views.department_delete, name='department_delete'),
     
+
+    path('procurement/', views.procurement_dashboard, name='procurement_dashboard'),
+    path('technician/', views.technician_workbench, name='technician_workbench'),
+    path('technician/scan/', views.technician_device_from_qr, name='technician_device_from_qr'),
+    path('technician/device/<int:pk>/', views.technician_device, name='technician_device'),
+    path('technician/device/<int:pk>/start-work-order/', views.technician_start_work_order, name='technician_start_work_order'),
+    path('technician/work-order/<int:maintenance_id>/stop/', views.technician_stop_work_order, name='technician_stop_work_order'),
+    path('technician/work-order/<int:maintenance_id>/sync-notes/', views.technician_sync_notes, name='technician_sync_notes'),
+
     # ============================================
     # REPORTS URLs (التقارير)
     # ============================================

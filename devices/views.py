@@ -14,7 +14,7 @@ from django.views.decorators.http import require_GET
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 
-from .models import Device, Department, Maintenance, MaintenanceTask
+from .models import Device, Department, Maintenance, MaintenanceTask, TechnicianNote
 from .forms import LoginForm, DeviceForm, DepartmentForm, MaintenanceForm
 from .scheduling import sync_calendar
 
@@ -953,3 +953,104 @@ def device_qr(request, pk):
     buf = io.BytesIO()
     img.save(buf, format='PNG')
     return HttpResponse(buf.getvalue(), content_type='image/png')
+
+@login_required
+def procurement_dashboard(request):
+    devices = Device.objects.prefetch_related('maintenances').all()
+    procurement_rows = []
+
+    for device in devices:
+        procurement_rows.append({
+            'device': device,
+            'tco': device.total_cost_of_ownership,
+            'replacement_score': device.replacement_recommendation_score,
+            'priority': device.replacement_priority_label,
+        })
+
+    procurement_rows.sort(key=lambda row: row['replacement_score'], reverse=True)
+    high_priority_count = sum(1 for row in procurement_rows if row['replacement_score'] >= 70)
+    medium_priority_count = sum(1 for row in procurement_rows if 40 <= row['replacement_score'] < 70)
+
+    context = {
+        'procurement_rows': procurement_rows[:50],
+        'portfolio_tco': sum((row['tco'] for row in procurement_rows), start=0),
+        'high_priority_count': high_priority_count,
+        'medium_priority_count': medium_priority_count,
+    }
+    return render(request, 'devices/procurement_dashboard.html', context)
+
+
+@login_required
+def technician_workbench(request):
+    open_work_orders = Maintenance.objects.select_related('device').exclude(status__in=['completed', 'verified']).order_by('-created_at')[:20]
+    return render(request, 'devices/technician/workbench.html', {'open_work_orders': open_work_orders})
+
+
+@login_required
+def technician_device_from_qr(request):
+    device_id = (request.GET.get('device_id') or '').strip()
+    device = get_object_or_404(Device, device_id__iexact=device_id)
+    return redirect('technician_device', pk=device.pk)
+
+
+@login_required
+def technician_device(request, pk):
+    device = get_object_or_404(Device, pk=pk)
+    active_work_order = device.maintenances.exclude(status__in=['completed', 'verified']).order_by('-created_at').first()
+    return render(request, 'devices/technician/device.html', {
+        'device': device,
+        'active_work_order': active_work_order,
+    })
+
+
+@login_required
+def technician_start_work_order(request, pk):
+    device = get_object_or_404(Device, pk=pk)
+    if request.method == 'POST':
+        work_order = Maintenance.objects.create(
+            device=device,
+            maintenance_type=request.POST.get('maintenance_type', 'corrective'),
+            technician=request.user.username,
+            assigned_technician=request.user.username,
+            status='in_progress',
+            started_at=timezone.now(),
+            description=request.POST.get('description') or 'Started from technician mobile flow',
+        )
+        messages.success(request, f'Work order #{work_order.id} started.')
+    return redirect('technician_device', pk=pk)
+
+
+@login_required
+def technician_stop_work_order(request, maintenance_id):
+    work_order = get_object_or_404(Maintenance, pk=maintenance_id)
+    if request.method == 'POST':
+        work_order.status = request.POST.get('status', 'completed')
+        work_order.stopped_at = timezone.now()
+        work_order.technician_signature = request.POST.get('technician_signature', request.user.username)
+        work_order.notes = request.POST.get('notes', work_order.notes)
+        if request.FILES.get('photo_attachment'):
+            work_order.photo_attachment = request.FILES['photo_attachment']
+        work_order.save()
+        messages.success(request, f'Work order #{work_order.id} updated.')
+    return redirect('technician_device', pk=work_order.device_id)
+
+
+@login_required
+def technician_sync_notes(request, maintenance_id):
+    work_order = get_object_or_404(Maintenance, pk=maintenance_id)
+    if request.method == 'POST':
+        offline_notes = request.POST.getlist('offline_notes')
+        if not offline_notes:
+            raw_notes = request.POST.get('offline_notes_blob', '')
+            offline_notes = [line.strip() for line in raw_notes.split('\n') if line.strip()]
+
+        for note_body in offline_notes:
+            TechnicianNote.objects.create(
+                maintenance=work_order,
+                body=note_body,
+                is_offline_created=True,
+                synced_at=timezone.now(),
+            )
+
+        messages.success(request, f'{len(offline_notes)} offline notes synced.')
+    return redirect('technician_device', pk=work_order.device_id)

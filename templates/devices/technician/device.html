@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Technician Device - {{ device.name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4>{{ device.name }} <small class="text-muted">{{ device.device_id }}</small></h4>
+  <a href="{% url 'technician_workbench' %}" class="btn btn-outline-secondary btn-sm">Back</a>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card p-3">
+      <h5>Start Work Order</h5>
+      <form method="post" action="{% url 'technician_start_work_order' device.pk %}">{% csrf_token %}
+        <label class="form-label">Type</label>
+        <select class="form-select mb-2" name="maintenance_type">
+          <option value="corrective">Corrective</option>
+          <option value="preventive">Preventive</option>
+          <option value="emergency">Emergency</option>
+          <option value="calibration">Calibration</option>
+        </select>
+        <textarea name="description" class="form-control mb-2" rows="3" placeholder="Issue/work description"></textarea>
+        <button class="btn btn-success">Start Work Order</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card p-3">
+      <h5>Stop & Close Work Order</h5>
+      {% if active_work_order %}
+      <form method="post" enctype="multipart/form-data" action="{% url 'technician_stop_work_order' active_work_order.id %}">{% csrf_token %}
+        <div class="alert alert-info py-2">Active WO: #{{ active_work_order.id }}</div>
+        <select class="form-select mb-2" name="status">
+          <option value="completed">Completed</option>
+          <option value="waiting_parts">Waiting Parts</option>
+          <option value="verified">Verified</option>
+        </select>
+        <input type="text" name="technician_signature" class="form-control mb-2" placeholder="Technician signature">
+        <input type="file" name="photo_attachment" class="form-control mb-2">
+        <textarea name="notes" class="form-control mb-2" rows="3" placeholder="Completion notes"></textarea>
+        <button class="btn btn-warning">Stop / Update</button>
+      </form>
+      <hr>
+      <h6>Offline Notes Sync</h6>
+      <form method="post" action="{% url 'technician_sync_notes' active_work_order.id %}">{% csrf_token %}
+        <textarea name="offline_notes_blob" class="form-control mb-2" rows="4" placeholder="Paste offline notes; one note per line"></textarea>
+        <button class="btn btn-primary btn-sm">Sync Notes</button>
+      </form>
+      {% else %}
+      <p class="text-muted mb-0">No active work order for this device.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -416,6 +416,8 @@
                                 <li><strong>Purchase Date:</strong> {{ device.purchase_date|date:"Y/m/d" }}</li>
                                 <li><strong>Warranty Expiry:</strong> {{ device.warranty_expiry|date:"Y/m/d" }}</li>
                                 <li><strong>Price:</strong> {{ device.price }} EGP</li>
+                                <li><strong>TCO:</strong> {{ device.total_cost_of_ownership|floatformat:2 }} EGP</li>
+                                <li><strong>Replacement Score:</strong> {{ device.replacement_recommendation_score }}/100 ({{ device.replacement_priority_label }})</li>
                             </ul>
                         </div>
                         <div class="col-md-6">

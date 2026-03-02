@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Technician Mobile Workbench{% endblock %}
+{% block content %}
+<h3>Technician Mobile-first Workflow</h3>
+<div class="card p-3 mb-3">
+  <form method="get" action="{% url 'technician_device_from_qr' %}" class="row g-2 align-items-end">
+    <div class="col-md-8">
+      <label class="form-label">Scan QR (or paste Device ID)</label>
+      <input type="text" name="device_id" class="form-control" placeholder="e.g. MON-100" required>
+    </div>
+    <div class="col-md-4">
+      <button class="btn btn-primary w-100">Open Device</button>
+    </div>
+  </form>
+</div>
+<div class="card p-3">
+  <h5>Open Work Orders</h5>
+  <ul class="list-group list-group-flush">
+    {% for wo in open_work_orders %}
+      <li class="list-group-item d-flex justify-content-between">
+        <span>#{{ wo.id }} - {{ wo.device.name }} ({{ wo.get_status_display }})</span>
+        <a href="{% url 'technician_device' wo.device.pk %}" class="btn btn-sm btn-outline-primary">Open</a>
+      </li>
+    {% empty %}
+      <li class="list-group-item text-muted">No open work orders.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

@@ -7,6 +7,7 @@ from django.core.files import File
 from django.utils import timezone
 from django.urls import reverse
 from django.conf import settings
+from decimal import Decimal
 
 class Department(models.Model):
     name = models.CharField(max_length=200, verbose_name='Department Name')
@@ -106,6 +107,41 @@ class Device(models.Model):
             kwargs.pop('force_insert', None)
             super().save(*args, **kwargs)
 
+    @property
+    def total_maintenance_cost(self):
+        return self.maintenances.aggregate(total=models.Sum('cost')).get('total') or Decimal('0')
+
+    @property
+    def total_cost_of_ownership(self):
+        base_price = Decimal(str(self.price or '0'))
+        return base_price + self.total_maintenance_cost
+
+    @property
+    def age_in_years(self):
+        if not self.purchase_date:
+            return 0
+        return max((timezone.now().date() - self.purchase_date).days / 365, 0)
+
+    @property
+    def replacement_recommendation_score(self):
+        """Score from 0-100. Higher means stronger replacement recommendation."""
+        today = timezone.now().date()
+        warranty_factor = 25 if self.warranty_expiry and self.warranty_expiry < today else 0
+        price_value = Decimal(str(self.price or '0'))
+        maintenance_factor = min(int(float(self.total_maintenance_cost / (price_value or 1)) * 40), 40) if price_value else 40
+        age_factor = min(int((self.age_in_years / 10) * 25), 25)
+        status_factor = 10 if self.status in {'maintenance', 'inactive'} else 0
+        return min(warranty_factor + maintenance_factor + age_factor + status_factor, 100)
+
+    @property
+    def replacement_priority_label(self):
+        score = self.replacement_recommendation_score
+        if score >= 70:
+            return 'High'
+        if score >= 40:
+            return 'Medium'
+        return 'Low'
+
 class Maintenance(models.Model):
     MAINTENANCE_TYPE = [
         ('preventive', 'Preventive Maintenance'),
@@ -143,6 +179,9 @@ class Maintenance(models.Model):
     status = models.CharField(max_length=20, choices=WORK_ORDER_STATUS, default='new', verbose_name='Work Order Status')
     sla_deadline = models.DateTimeField(null=True, blank=True, verbose_name='SLA Deadline')
     photo_attachment = models.FileField(upload_to='maintenance/photos/', null=True, blank=True, verbose_name='Photo Attachment')
+    technician_signature = models.CharField(max_length=200, blank=True, verbose_name='Technician Signature')
+    started_at = models.DateTimeField(null=True, blank=True, verbose_name='Started At')
+    stopped_at = models.DateTimeField(null=True, blank=True, verbose_name='Stopped At')
     calibration_certificate = models.FileField(upload_to='maintenance/calibration/', null=True, blank=True, verbose_name='Calibration Certificate')
     completed = models.BooleanField(default=True, verbose_name='Completed')
     next_maintenance_date = models.DateField(blank=True, null=True, verbose_name='Next Maintenance Date')
@@ -178,6 +217,20 @@ class Maintenance(models.Model):
         self.completed = self.status in {'completed', 'verified'}
         self.full_clean()
         super().save(*args, **kwargs)
+
+
+class TechnicianNote(models.Model):
+    maintenance = models.ForeignKey(Maintenance, on_delete=models.CASCADE, related_name='technician_notes')
+    body = models.TextField()
+    is_offline_created = models.BooleanField(default=False)
+    synced_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Note #{self.pk} for WO {self.maintenance_id}"
 
 
 class PMTemplate(models.Model):

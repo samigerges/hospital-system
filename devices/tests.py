@@ -1,10 +1,11 @@
 from datetime import timedelta
+from decimal import Decimal
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import timezone
 
-from .models import Department, Device, Maintenance
+from .models import Department, Device, Maintenance, TechnicianNote
 
 
 class MaintenanceWorkOrderTests(TestCase):
@@ -17,10 +18,10 @@ class MaintenanceWorkOrderTests(TestCase):
             device_type='monitor',
             manufacturer='Acme',
             model='A1',
-            purchase_date=timezone.now().date(),
-            warranty_expiry=timezone.now().date() + timedelta(days=365),
+            purchase_date=timezone.now().date() - timedelta(days=3650),
+            warranty_expiry=timezone.now().date() - timedelta(days=1),
             price='1000.00',
-            status='active',
+            status='maintenance',
             department=self.department,
             location='Room 1',
         )
@@ -69,3 +70,35 @@ class MaintenanceWorkOrderTests(TestCase):
         maintenance.status = 'verified'
         maintenance.save()
         self.assertFalse(maintenance.is_sla_breached)
+
+    def test_tco_and_replacement_score(self):
+        Maintenance.objects.create(
+            device=self.device,
+            maintenance_type='corrective',
+            technician='Tech 1',
+            assigned_technician='Tech 2',
+            description='Major repair',
+            cost='700.00',
+            status='completed',
+        )
+        self.assertEqual(self.device.total_maintenance_cost, Decimal('700'))
+        self.assertEqual(self.device.total_cost_of_ownership, Decimal('1700.00'))
+        self.assertGreaterEqual(self.device.replacement_recommendation_score, 70)
+        self.assertEqual(self.device.replacement_priority_label, 'High')
+
+    def test_technician_note_sync_fields(self):
+        maintenance = Maintenance.objects.create(
+            device=self.device,
+            maintenance_type='corrective',
+            technician='Tech 1',
+            assigned_technician='Tech 2',
+            description='Fix issue',
+            status='in_progress',
+        )
+        note = TechnicianNote.objects.create(
+            maintenance=maintenance,
+            body='Offline captured note',
+            is_offline_created=True,
+            synced_at=timezone.now(),
+        )
+        self.assertTrue(note.is_offline_created)

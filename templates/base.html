@@ -277,6 +277,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     </a>
                 </li>
                 
+
+                <li class="nav-item me-1">
+                    <a class="nav-link d-flex align-items-center {% if request.resolver_match.url_name == 'procurement_dashboard' %}active{% endif %}" 
+                       href="{% url 'procurement_dashboard' %}">
+                        <i class="bi bi-cash-coin me-2"></i>
+                        <span class="nav-text">Procurement</span>
+                    </a>
+                </li>
+                <li class="nav-item me-1">
+                    <a class="nav-link d-flex align-items-center {% if 'technician' in request.resolver_match.url_name %}active{% endif %}" 
+                       href="{% url 'technician_workbench' %}">
+                        <i class="bi bi-phone me-2"></i>
+                        <span class="nav-text">Technician</span>
+                    </a>
+                </li>
+
                 <!-- Devices -->
                 <li class="nav-item me-1">
                     <a class="nav-link d-flex align-items-center {% if 'device' in request.resolver_match.url_name %}active{% endif %}" 

@@ -1,6 +1,8 @@
 # devices/forms.py
 from django import forms
-from .models import Device, Department, Maintenance
+
+from .models import Device, Department, Maintenance, TechnicianNote
+
 
 class LoginForm(forms.Form):
     username = forms.CharField(
@@ -16,6 +18,7 @@ class LoginForm(forms.Form):
         })
     )
 
+
 class DeviceForm(forms.ModelForm):
     class Meta:
         model = Device
@@ -28,6 +31,7 @@ class DeviceForm(forms.ModelForm):
             'notes': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
         }
 
+
 class DepartmentForm(forms.ModelForm):
     class Meta:
         model = Department
@@ -38,6 +42,7 @@ class DepartmentForm(forms.ModelForm):
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
+
 class MaintenanceForm(forms.ModelForm):
     class Meta:
         model = Maintenance
@@ -46,8 +51,20 @@ class MaintenanceForm(forms.ModelForm):
             'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'next_maintenance_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'sla_deadline': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+            'started_at': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+            'stopped_at': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
             'photo_attachment': forms.ClearableFileInput(attrs={'class': 'form-control'}),
             'calibration_certificate': forms.ClearableFileInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
             'notes': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
+            'technician_signature': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Type technician full name'}),
+        }
+
+
+class TechnicianNoteForm(forms.ModelForm):
+    class Meta:
+        model = TechnicianNote
+        fields = ['body']
+        widgets = {
+            'body': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Write note (offline-safe)...'}),
         }
