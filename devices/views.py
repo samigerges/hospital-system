@@ -10,6 +10,7 @@ from django.db.models import Count, Avg, Sum, Q
 from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
 from django.views.decorators.http import require_GET
+from django.urls import reverse
 
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
@@ -946,9 +947,8 @@ from .models import Device
 def device_qr(request, pk):
     """Generate QR on-the-fly pointing to the current host + device URL."""
     device = get_object_or_404(Device, pk=pk)
-    # استخدم الطلب لبناء URL كامل يتغير مع تغير IP
-    device_path = f"/devices/{device.pk}/"  # عدّل المسار لو كان مختلفًا في المشروع
-    full_url = request.build_absolute_uri(device_path)
+    device_path = reverse('device_detail', kwargs={'pk': device.pk})
+    full_url = request.build_absolute_uri(f"{device_path}?qr=1")
     img = qrcode.make(full_url)
     buf = io.BytesIO()
     img.save(buf, format='PNG')

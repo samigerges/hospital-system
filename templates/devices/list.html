@@ -181,10 +181,10 @@
                         <!-- QR Code -->
                         <td class="ps-3">
                             {% if device.qr_code %}
-                            <img src="{{ device.qr_code.url }}" alt="QR Code" 
+                            <img src="{% url 'device_qr' device.pk %}" alt="QR Code" 
                                  class="rounded border border-light qr-image" 
                                  style="width: 50px; height: 50px; cursor: pointer; background: white; padding: 4px;"
-                                 onclick="event.stopPropagation(); showQRModal('{{ device.qr_code.url|escapejs }}', '{{ device.name|escapejs }}', '{{ device.device_id|escapejs }}', '{{ device.get_status_display|escapejs }}')"
+                                 onclick="event.stopPropagation(); showQRModal('{% url 'device_qr' device.pk %}', '{{ device.name|escapejs }}', '{{ device.device_id|escapejs }}', '{{ device.get_status_display|escapejs }}')"
                                  title="Click to view QR code">
                             {% else %}
                             <span class="badge bg-secondary rounded-pill">

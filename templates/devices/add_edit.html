@@ -73,7 +73,7 @@
                 <h6 class="mb-0"><i class="bi bi-qr-code"></i> Device QR Code</h6>
             </div>
             <div class="card-body text-center">
-                <img src="{{ device.qr_code.url }}" alt="QR Code" class="img-thumbnail" style="max-width: 200px;">
+                <img src="{% url 'device_qr' device.pk %}" alt="QR Code" class="img-thumbnail" style="max-width: 200px;">
                 <p class="text-muted mt-2">This code can be scanned for quick access to device information</p>
             </div>
         </div>

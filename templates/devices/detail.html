@@ -548,13 +548,13 @@
                 <div class="card-body text-center">
                     {% if device.qr_code %}
                     <div class="mb-3">
-                        <img src="{{ device.qr_code.url }}" alt="QR Code" class="img-fluid" style="max-width: 170px;">
+                        <img src="{% url 'device_qr' device.pk %}" alt="QR Code" class="img-fluid" style="max-width: 170px;">
                     </div>
                     <p class="text-muted mb-2"><strong>Device ID:</strong> {{ device.device_id }}</p>
                     <p class="text-muted mb-3">This code can be scanned to directly access this page</p>
 
                     <div class="d-grid gap-2">
-                        <a href="{{ device.qr_code.url }}" download class="btn btn-primary">
+                        <a href="{% url 'device_qr' device.pk %}" download class="btn btn-primary">
                             <i class="bi bi-download"></i> Download QR Code
                         </a>
                     </div>

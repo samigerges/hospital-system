@@ -21,7 +21,7 @@
                 <div class="card-body">
                     <div class="text-center mb-4">
                         {% if device.qr_code %}
-                        <img src="{{ device.qr_code.url }}" alt="QR Code" class="img-fluid mb-3" style="max-width: 200px;">
+                        <img src="{% url 'device_qr' device.pk %}" alt="QR Code" class="img-fluid mb-3" style="max-width: 200px;">
                         {% endif %}
                         <h3>{{ device.name }}</h3>
                         <p class="text-muted">Device ID: <strong>{{ device.device_id }}</strong></p>
