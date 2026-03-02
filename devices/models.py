@@ -178,3 +178,84 @@ class Maintenance(models.Model):
         self.completed = self.status in {'completed', 'verified'}
         self.full_clean()
         super().save(*args, **kwargs)
+
+
+class PMTemplate(models.Model):
+    name = models.CharField(max_length=200)
+    maintenance_type = models.CharField(
+        max_length=20,
+        choices=Maintenance.MAINTENANCE_TYPE,
+        default='preventive',
+    )
+    device_type = models.CharField(max_length=50, choices=Device.DEVICE_TYPE)
+    manufacturer = models.CharField(max_length=200, blank=True)
+    model = models.CharField(max_length=200, blank=True)
+    interval_days = models.PositiveIntegerField(default=90)
+    reminder_days_before = models.PositiveIntegerField(default=7)
+    is_active = models.BooleanField(default=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['device_type', 'manufacturer', 'model', 'name']
+
+    def __str__(self):
+        scope = ' / '.join(part for part in [self.device_type, self.manufacturer, self.model] if part)
+        return f"{self.name}{f' ({scope})' if scope else ''}"
+
+
+class MaintenanceTask(models.Model):
+    STATUS_CHOICES = [
+        ('scheduled', 'Scheduled'),
+        ('due', 'Due Now'),
+        ('overdue', 'Overdue'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    URGENCY_CHOICES = [
+        ('normal', 'Normal'),
+        ('soon', 'Due Soon'),
+        ('urgent', 'Urgent'),
+        ('overdue', 'Overdue'),
+    ]
+
+    device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='maintenance_tasks')
+    template = models.ForeignKey(PMTemplate, on_delete=models.CASCADE, related_name='maintenance_tasks')
+    due_date = models.DateField()
+    reminder_date = models.DateField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='scheduled')
+    urgency = models.CharField(max_length=20, choices=URGENCY_CHOICES, default='normal')
+    source_maintenance = models.ForeignKey(Maintenance, null=True, blank=True, on_delete=models.SET_NULL)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['due_date', 'urgency']
+        unique_together = ('device', 'template', 'due_date')
+
+    def __str__(self):
+        return f"{self.device} • {self.template.name} • {self.due_date}"
+
+    def refresh_status(self, reference_date=None):
+        if self.status in {'completed', 'cancelled'}:
+            return
+
+        today = reference_date or timezone.now().date()
+        delta = (self.due_date - today).days
+
+        if delta < 0:
+            self.status = 'overdue'
+            self.urgency = 'overdue'
+        elif delta == 0:
+            self.status = 'due'
+            self.urgency = 'urgent'
+        elif delta <= self.template.reminder_days_before:
+            self.status = 'scheduled'
+            self.urgency = 'soon'
+        else:
+            self.status = 'scheduled'
+            self.urgency = 'normal'
