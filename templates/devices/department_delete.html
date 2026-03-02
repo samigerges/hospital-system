@@ -1,0 +1,37 @@
+ <!-- templates/devices/department_delete.html -->
+{% extends 'base.html' %}
+
+{% block title %}Confirm Department Deletion{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card shadow">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Confirm Department Deletion</h4>
+            </div>
+            <div class="card-body text-center py-5">
+                <i class="bi bi-layers fs-1 text-danger mb-4"></i>
+                <h4>Are you sure you want to delete this department?</h4>
+                <p class="text-muted mb-4">This action cannot be undone</p>
+                
+                <div class="alert alert-warning">
+                    <i class="bi bi-info-circle"></i>
+                    Department: <strong>{{ department.name }}</strong><br>
+                    Floor: <strong>{{ department.floor }}</strong>
+                </div>
+                
+                <form method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-lg">
+                        <i class="bi bi-check-circle"></i> Yes, Delete
+                    </button>
+                </form>
+                <a href="{% url 'departments_list' %}" class="btn btn-secondary btn-lg">
+                    <i class="bi bi-x-circle"></i> Cancel
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

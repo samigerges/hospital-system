@@ -1,0 +1,338 @@
+ <!-- templates/devices/device_public.html -->
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ device.name }} - DeviceCare System</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            padding-top: 20px;
+            padding-bottom: 50px;
+        }
+        
+        .device-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .device-header {
+            background: linear-gradient(135deg, var(--app-primary) 0%, rgba(var(--app-primary-rgb), 0.9) 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .device-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 2.5rem;
+        }
+        
+        .info-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #e3e6f0;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            color: #333;
+            font-size: 1.1rem;
+        }
+        
+        .status-badge {
+            font-size: 0.9em;
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
+        
+        .login-prompt {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .qr-section {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .device-header {
+                padding: 15px;
+            }
+            
+            .device-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+            }
+        }
+    </style>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Device Header -->
+        <div class="device-card">
+            <div class="device-header">
+                <div class="device-icon">
+                    {% if device.device_type == 'monitor' %}
+                    <i class="bi bi-display"></i>
+                    {% elif device.device_type == 'ventilator' %}
+                    <i class="bi bi-wind"></i>
+                    {% elif device.device_type == 'defibrillator' %}
+                    <i class="bi bi-lightning-charge"></i>
+                    {% elif device.device_type == 'infusion_pump' %}
+                    <i class="bi bi-droplet"></i>
+                    {% elif device.device_type == 'ultrasound' %}
+                    <i class="bi bi-soundwave"></i>
+                    {% elif device.device_type == 'xray' %}
+                    <i class="bi bi-camera"></i>
+                    {% else %}
+                    <i class="bi bi-cpu"></i>
+                    {% endif %}
+                </div>
+                <h2 class="mb-2">{{ device.name }}</h2>
+                <span class="status-badge badge bg-{{ device.get_status_color }}">
+                    {{ device.get_status_display }}
+                </span>
+                <p class="mb-0 mt-2">{{ device.model }} - {{ device.manufacturer }}</p>
+            </div>
+            
+            <div class="p-4">
+                <!-- Basic Information -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-card">
+                            <div class="info-label">Device ID</div>
+                            <div class="info-value">{{ device.device_id }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-card">
+                            <div class="info-label">Serial Number</div>
+                            <div class="info-value">{{ device.serial_number }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-card">
+                            <div class="info-label">Device Type</div>
+                            <div class="info-value">{{ device.get_device_type_display }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-card">
+                            <div class="info-label">Manufacturer</div>
+                            <div class="info-value">{{ device.manufacturer }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Location Information -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-card">
+                            <div class="info-label">Department</div>
+                            <div class="info-value">
+                                {% if device.department %}
+                                {{ device.department.name }} (Floor {{ device.department.floor }})
+                                {% else %}
+                                Not specified
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-card">
+                            <div class="info-label">Location</div>
+                            <div class="info-value">{{ device.location }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Dates Information -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-card">
+                            <div class="info-label">Purchase Date</div>
+                            <div class="info-value">{{ device.purchase_date|date:"Y/m/d" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-card">
+                            <div class="info-label">Warranty Expiry</div>
+                            <div class="info-value">{{ device.warranty_expiry|date:"Y/m/d" }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Maintenance Information -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-card">
+                            <div class="info-label">Last Maintenance</div>
+                            <div class="info-value">
+                                {% if device.last_maintenance %}
+                                {{ device.last_maintenance|date:"Y/m/d" }}
+                                {% else %}
+                                None
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-card">
+                            <div class="info-label">Next Maintenance</div>
+                            <div class="info-value">
+                                {% if device.next_maintenance %}
+                                {{ device.next_maintenance|date:"Y/m/d" }}
+                                {% else %}
+                                Not specified
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Notes -->
+                {% if device.notes %}
+                <div class="info-card">
+                    <div class="info-label">Notes</div>
+                    <div class="info-value">{{ device.notes|linebreaks }}</div>
+                </div>
+                {% endif %}
+                
+                <!-- Maintenance History -->
+                {% if maintenances %}
+                <div class="info-card">
+                    <h5 class="mb-3"><i class="bi bi-tools"></i> Recent Maintenance History</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Maintenance Type</th>
+                                    <th>Technician</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for maintenance in maintenances|slice:":3" %}
+                                <tr>
+                                    <td>{{ maintenance.date|date:"Y/m/d" }}</td>
+                                    <td>{{ maintenance.get_maintenance_type_display }}</td>
+                                    <td>{{ maintenance.technician }}</td>
+                                    <td>
+                                        {% if maintenance.completed %}
+                                        <span class="badge bg-success">Completed</span>
+                                        {% else %}
+                                        <span class="badge bg-warning">In Progress</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- QR Code Display -->
+                <div class="qr-section">
+                    <h5><i class="bi bi-qr-code"></i> Device QR Code</h5>
+                    {% if device.qr_code %}
+                            <img src="{{ BASE_URL }}{{ device.qr_code.url }}">
+                         alt="QR Code" 
+                         class="img-thumbnail mt-3" 
+                         style="max-width: 200px;">
+                    <p class="text-muted mt-2">Scan this code to access this page</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Login Prompt -->
+        <div class="login-prompt">
+            <h4 class="mb-3"><i class="bi bi-shield-lock"></i> Limited Access</h4>
+            <p class="mb-3">You are viewing a simplified version of the device page. Please login to edit or add records.</p>
+            <div class="d-grid gap-2 col-md-6 mx-auto">
+                <a href="{% url 'login' %}" class="btn btn-light">
+                    <i class="bi bi-box-arrow-in-right"></i> Login
+                </a>
+                <a href="/" class="btn btn-outline-light">
+                    <i class="bi bi-house"></i> Home Page
+                </a>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="text-center mt-4">
+            <small class="text-muted">
+                <i class="bi bi-c-circle"></i> DeviceCare System
+                {% if is_qr_access %}
+                | Accessed via QR Code
+                {% endif %}
+            </small>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.info-card');
+            cards.forEach((card, index) => {
+                card.style.animation = `fadeIn 0.5s ease ${index * 0.1}s forwards`;
+                card.style.opacity = '0';
+            });
+        });
+        
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

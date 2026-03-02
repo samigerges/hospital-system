@@ -1,0 +1,118 @@
+ <!-- templates/devices/public_detail.html -->
+{% extends 'base.html' %}
+
+{% block title %}Device Information - {{ device.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0"><i class="bi bi-cpu"></i> Device Information</h4>
+                        <div class="text-end">
+                            <small class="d-block">QR Scan</small>
+                            <small class="d-block">{{ device.created_at|date:"Y/m/d" }}</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        {% if device.qr_code %}
+                        <img src="{{ device.qr_code.url }}" alt="QR Code" class="img-fluid mb-3" style="max-width: 200px;">
+                        {% endif %}
+                        <h3>{{ device.name }}</h3>
+                        <p class="text-muted">Device ID: <strong>{{ device.device_id }}</strong></p>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="border-bottom pb-2 mb-3">Basic Information</h6>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <strong><i class="bi bi-tag text-primary"></i> Serial Number:</strong>
+                                    <span class="float-start">{{ device.serial_number }}</span>
+                                </li>
+                                <li class="mb-2">
+                                    <strong><i class="bi bi-gear text-primary"></i> Type:</strong>
+                                    <span class="float-start">{{ device.get_device_type_display }}</span>
+                                </li>
+                                <li class="mb-2">
+                                    <strong><i class="bi bi-layers text-primary"></i> Manufacturer:</strong>
+                                    <span class="float-start">{{ device.manufacturer }}</span>
+                                </li>
+                                <li class="mb-2">
+                                    <strong><i class="bi bi-box text-primary"></i> Model:</strong>
+                                    <span class="float-start">{{ device.model }}</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6 class="border-bottom pb-2 mb-3">Status & Location</h6>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <strong><i class="bi bi-circle-fill text-primary"></i> Status:</strong>
+                                    <span class="float-start badge bg-{{ device.get_status_color }}">
+                                        {{ device.get_status_display }}
+                                    </span>
+                                </li>
+                                <li class="mb-2">
+                                    <strong><i class="bi bi-hospital text-primary"></i> Department:</strong>
+                                    <span class="float-start">
+                                        {% if device.department %}
+                                        {{ device.department.name }} (Floor {{ device.department.floor }})
+                                        {% else %}
+                                        <span class="text-muted">Not specified</span>
+                                        {% endif %}
+                                    </span>
+                                </li>
+                                <li class="mb-2">
+                                    <strong><i class="bi bi-geo-alt text-primary"></i> Location:</strong>
+                                    <span class="float-start">{{ device.location }}</span>
+                                </li>
+                                <li class="mb-2">
+                                    <strong><i class="bi bi-calendar-check text-primary"></i> Purchase Date:</strong>
+                                    <span class="float-start">{{ device.purchase_date|date:"Y/m/d" }}</span>
+                                </li>
+                                <li class="mb-2">
+                                    <strong><i class="bi bi-shield-check text-primary"></i> Warranty Expiry:</strong>
+                                    <span class="float-start">{{ device.warranty_expiry|date:"Y/m/d" }}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    {% if device.next_maintenance %}
+                    <div class="alert alert-warning mt-4">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Notice:</strong> Next maintenance due: {{ device.next_maintenance|date:"Y/m/d" }}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mt-4 text-center">
+                        <p class="text-muted mb-3">
+                            For more details or to log maintenance, please login
+                        </p>
+                        <a href="{% url 'login' %}?next={% url 'device_detail' device.pk %}" class="btn btn-primary">
+                            <i class="bi bi-box-arrow-in-right"></i> Login
+                        </a>
+                        <a href="{% url 'login' %}" class="btn btn-outline-secondary ms-2">
+                            <i class="bi bi-house-door"></i> Home Page
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-light text-center">
+                    <small class="text-muted">
+                        <i class="bi bi-qr-code-scan"></i>
+                        Accessed via QR Code - DeviceCare System
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

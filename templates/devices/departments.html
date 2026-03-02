@@ -1,0 +1,518 @@
+<!-- templates/devices/departments.html -->
+{% extends 'base.html' %}
+
+{% block title %}Departments Management - DeviceCare System{% endblock %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-12 col-md-8">
+        <h1 class="h2 mb-1 fw-bold">
+            <i class="bi bi-layers me-2 text-primary"></i>Departments Management
+        </h1>
+        <p class="text-muted mb-0">Manage hospital departments and device distribution</p>
+    </div>
+    <div class="col-12 col-md-4 text-md-end mt-2 mt-md-0">
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-primary btn-hover-scale me-2">
+            <i class="bi bi-arrow-left me-1"></i> Dashboard
+        </a>
+        <a href="{% url 'department_add' %}" class="btn btn-primary btn-hover-scale">
+            <i class="bi bi-plus-circle me-1"></i> Add Department
+        </a>
+    </div>
+</div>
+
+<!-- Department Statistics -->
+{% if departments %}
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card stat-card border-0 shadow-sm h-100 hover-lift theme-transition">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="text-uppercase small fw-bold mb-1">Total Departments</h6>
+                        <h2 class="mb-0 fw-bold">{{ departments.count }}</h2>
+                        <p class="text-muted small mb-0">
+                            <i class="bi bi-layers me-1 text-primary"></i> All hospital units
+                        </p>
+                    </div>
+                    <div class="icon-stat bg-primary text-white rounded-3">
+                        <i class="bi bi-layers fs-4"></i>
+                    </div>
+                </div>
+                <div class="mt-2 pt-2 border-top border-light">
+                    <small class="fw-semibold text-primary">
+                        <i class="bi bi-buildings me-1"></i>
+                        <span>Managing all devices</span>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card stat-card border-0 shadow-sm h-100 hover-lift theme-transition">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="text-uppercase small fw-bold mb-1">Total Devices</h6>
+                        <h2 class="mb-0 fw-bold">{{ total_devices }}</h2>
+                        <p class="text-muted small mb-0">
+                            <i class="bi bi-cpu me-1 text-success"></i> Across all departments
+                        </p>
+                    </div>
+                    <div class="icon-stat bg-success text-white rounded-3">
+                        <i class="bi bi-cpu fs-4"></i>
+                    </div>
+                </div>
+                <div class="mt-2 pt-2 border-top border-light">
+                    <small>
+                        Average <strong>{{ avg_devices_per_dept|floatformat:1 }}</strong> devices per department
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card stat-card border-0 shadow-sm h-100 hover-lift theme-transition">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="text-uppercase small fw-bold mb-1">Top Department</h6>
+                        <h4 class="mb-0 fw-bold">{{ top_department.name|truncatechars:15 }}</h4>
+                        <p class="text-muted small mb-0">
+                            <i class="bi bi-trophy me-1 text-warning"></i> Most devices
+                        </p>
+                    </div>
+                    <div class="icon-stat bg-info text-white rounded-3">
+                        <i class="bi bi-trophy fs-4"></i>
+                    </div>
+                </div>
+                <div class="mt-2 pt-2 border-top border-light">
+                    <small class="fw-semibold text-info">
+                        <i class="bi bi-cpu me-1"></i>
+                        <span>{{ top_department.device_count }} devices</span>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Departments Grid -->
+<div class="row g-4">
+    {% for department in departments %}
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100 hover-lift theme-transition department-card">
+            <div class="card-header bg-surface border-bottom py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-building me-2"></i>{{ department.name }}
+                </h5>
+                <span class="badge bg-warning text-white rounded-pill">
+                    <i class="bi bi-geo-alt me-1"></i>Floor {{ department.floor|default:"N/A" }}
+                </span>
+            </div>
+            
+            <div class="card-body p-3">
+                <!-- Department Information -->
+                <div class="mb-3">
+                    <h6 class="small text-uppercase fw-bold mb-2">
+                        <i class="bi bi-info-circle me-1"></i>Information
+                    </h6>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="border rounded-2 p-2 text-center border-light" 
+                                 style="background: linear-gradient(135deg, rgba(var(--primary-500-rgb), 0.05), rgba(var(--primary-400-rgb), 0.1));">
+                                <i class="bi bi-telephone text-primary"></i>
+                                <div class="small mt-1">
+                                    {% if department.phone %}
+                                    {{ department.phone }}
+                                    {% else %}
+                                    <span class="text-muted">No phone</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded-2 p-2 text-center border-light" 
+                                 style="background: linear-gradient(135deg, rgba(var(--success-500-rgb), 0.05), rgba(var(--success-400-rgb), 0.1));">
+                                <i class="bi bi-cpu text-success"></i>
+                                <div class="small mt-1 fw-bold">
+                                    {{ department.device_count }} devices
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Department Manager -->
+                {% if department.manager %}
+                <div class="mb-3">
+                    <h6 class="small text-uppercase fw-bold mb-2">
+                        <i class="bi bi-person-badge me-1"></i>Manager
+                    </h6>
+                    <div class="d-flex align-items-center">
+                        <div class="icon-stat-sm bg-info text-white rounded-circle me-2">
+                            <i class="bi bi-person"></i>
+                        </div>
+                        <div>
+                            <div class="fw-medium">{{ department.manager }}</div>
+                            <small class="text-muted">{{ department.email|default:"No email" }}</small>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Device Status Overview -->
+                {% if department.device_count > 0 %}
+                <div>
+                    <h6 class="small text-uppercase fw-bold mb-2">
+                        <i class="bi bi-pie-chart me-1"></i>Device Status
+                    </h6>
+                    <div class="row g-1 text-center">
+                        <div class="col-4">
+                            <div class="border rounded-2 p-1 border-light" 
+                                 style="background: linear-gradient(135deg, rgba(var(--success-500-rgb), 0.05), rgba(var(--success-400-rgb), 0.1));">
+                                <small class="text-success fw-semibold">Active</small>
+                                <div class="fw-bold">{{ department.active_devices|default:"0" }}</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="border rounded-2 p-1 border-light" 
+                                 style="background: linear-gradient(135deg, rgba(var(--warning-500-rgb), 0.05), rgba(var(--warning-400-rgb), 0.1));">
+                                <small class="text-warning fw-semibold">Maintenance</small>
+                                <div class="fw-bold">{{ department.maintenance_devices|default:"0" }}</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="border rounded-2 p-1 border-light" 
+                                 style="background: linear-gradient(135deg, rgba(var(--danger-500-rgb), 0.05), rgba(var(--danger-400-rgb), 0.1));">
+                                <small class="text-danger fw-semibold">Inactive</small>
+                                <div class="fw-bold">{{ department.inactive_devices|default:"0" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="card-footer bg-surface border-top py-2">
+                <div class="btn-group w-100" role="group">
+                    <a href="{% url 'device_list' %}?department={{ department.id }}" 
+                       class="btn btn-sm btn-outline-primary flex-fill" 
+                       title="View department devices">
+                        <i class="bi bi-eye me-1"></i> View
+                    </a>
+                    <a href="{% url 'department_edit' department.pk %}" 
+                       class="btn btn-sm btn-outline-secondary flex-fill"
+                       title="Edit department">
+                        <i class="bi bi-pencil me-1"></i> Edit
+                    </a>
+                    <button type="button" class="btn btn-sm btn-outline-danger flex-fill"
+                            data-bs-toggle="modal" data-bs-target="#deleteDeptModal{{ department.pk }}"
+                            title="Delete department">
+                        <i class="bi bi-trash me-1"></i> Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Modal -->
+    <div class="modal fade" id="deleteDeptModal{{ department.pk }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content border-0 shadow-lg theme-transition">
+                <div class="modal-header bg-surface border-bottom py-3">
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-exclamation-triangle me-2 text-danger"></i> Confirm Deletion
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this department?</p>
+                    
+                    <div class="alert alert-warning border-warning">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="bi bi-building fs-4 text-warning"></i>
+                            </div>
+                            <div>
+                                <strong>{{ department.name }}</strong><br>
+                                <small class="text-muted">Floor {{ department.floor|default:"N/A" }}</small><br>
+                                <small class="text-muted">{{ department.device_count }} devices</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if department.device_count > 0 %}
+                    <div class="alert alert-danger border-danger">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <div>
+                                <strong>Warning!</strong>
+                                <p class="mb-0">
+                                    This department contains <strong>{{ department.device_count }}</strong> devices.
+                                    Deleting the department will orphan these devices.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <p class="text-danger fw-semibold">
+                        <i class="bi bi-info-circle me-1"></i> This action cannot be undone!
+                    </p>
+                </div>
+                <div class="modal-footer bg-surface border-top">
+                    <form method="post" action="{% url 'department_delete' department.pk %}">
+                        {% csrf_token %}
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-danger fw-semibold">
+                            <i class="bi bi-trash me-1"></i> Delete Department
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="card shadow-sm border-0 theme-transition">
+            <div class="card-body text-center py-5">
+                <div class="mb-4">
+                    <i class="bi bi-layers display-6 text-muted"></i>
+                </div>
+                <h4 class="fw-bold mb-3">No Departments Found</h4>
+                <p class="text-muted mb-4">Start by adding the first department to organize your devices</p>
+                <a href="{% url 'department_add' %}" class="btn btn-primary btn-lg fw-semibold">
+                    <i class="bi bi-plus-circle me-2"></i> Add First Department
+                </a>
+                <div class="mt-4">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Departments help organize devices by location and usage
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+/* Custom styles for departments page */
+.department-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+}
+
+.department-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg) !important;
+    border-color: var(--border-medium);
+}
+
+.icon-stat {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-default);
+}
+
+.icon-stat:hover {
+    transform: scale(1.05);
+}
+
+.icon-stat-sm {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-hover-scale:hover {
+    transform: scale(1.02);
+    transition: transform 0.2s ease;
+}
+
+.stat-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg) !important;
+    border-color: var(--border-medium);
+}
+
+/* Department stats boxes */
+.dept-info-box {
+    background: linear-gradient(135deg, 
+        rgba(var(--primary-500-rgb), 0.05), 
+        rgba(var(--primary-400-rgb), 0.1));
+    border: 1px solid rgba(var(--primary-500-rgb), 0.1);
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
+    transition: var(--transition-default);
+}
+
+.dept-info-box:hover {
+    transform: translateY(-2px);
+    border-color: rgba(var(--primary-500-rgb), 0.3);
+}
+
+.devtice-count-box {
+    background: linear-gradient(135deg, 
+        rgba(var(--success-500-rgb), 0.05), 
+        rgba(var(--success-400-rgb), 0.1));
+    border: 1px solid rgba(var(--success-500-rgb), 0.1);
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
+    transition: var(--transition-default);
+}
+
+.devtice-count-box:hover {
+    transform: translateY(-2px);
+    border-color: rgba(var(--success-500-rgb), 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .btn-group .btn {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .card-header h5 {
+        font-size: 1rem;
+    }
+    
+    .department-card {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Animation for card entrance */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.department-card {
+    animation: fadeInUp 0.5s ease forwards;
+    opacity: 0;
+}
+
+.department-card:nth-child(1) { animation-delay: 0.1s; }
+.department-card:nth-child(2) { animation-delay: 0.2s; }
+.department-card:nth-child(3) { animation-delay: 0.3s; }
+.department-card:nth-child(4) { animation-delay: 0.4s; }
+.department-card:nth-child(5) { animation-delay: 0.5s; }
+.department-card:nth-child(6) { animation-delay: 0.6s; }
+
+/* Button group styling */
+.btn-group .btn {
+    border-radius: 6px !important;
+    margin: 0 1px;
+}
+
+.btn-group .btn:first-child {
+    border-top-left-radius: 6px !important;
+    border-bottom-left-radius: 6px !important;
+}
+
+.btn-group .btn:last-child {
+    border-top-right-radius: 6px !important;
+    border-bottom-right-radius: 6px !important;
+}
+
+/* Manager info styling */
+.manager-info {
+    background: linear-gradient(135deg, 
+        rgba(var(--info-500-rgb), 0.05), 
+        rgba(var(--info-400-rgb), 0.1));
+    border: 1px solid rgba(var(--info-500-rgb), 0.1);
+    border-radius: 8px;
+    padding: 10px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add hover effect to department cards
+    const departmentCards = document.querySelectorAll('.department-card');
+    departmentCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+        });
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Add animation delay to cards
+    departmentCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+    });
+    
+    // Add button hover effects
+    const buttons = document.querySelectorAll('.btn-hover-scale');
+    buttons.forEach(btn => {
+        btn.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.02)';
+        });
+        btn.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+    
+    // Initialize Bootstrap tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Theme transition helper
+    function applyThemeTransition(elements) {
+        elements.forEach(element => {
+            element.classList.add('theme-transition');
+        });
+    }
+    
+    // Apply theme transition to interactive elements
+    applyThemeTransition(document.querySelectorAll('.btn, .badge, .card, .modal-content, .dept-info-box, .devtice-count-box'));
+    
+    // Add hover effect to stat cards
+    const statCards = document.querySelectorAll('.stat-card');
+    statCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+        });
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+});
+</script>
+{% endblock %}

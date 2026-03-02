@@ -1,0 +1,721 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}Device Details - {{ device.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* =========================================================
+   THEME - Clean Medical (Same as Control Center)
+   ========================================================= */
+:root {
+  --cc-primary: #2563EB;      /* medical blue */
+  --cc-secondary: #0EA5A4;    /* teal */
+  --cc-success: #22C55E;
+  --cc-warning: #F59E0B;
+  --cc-danger: #EF4444;
+  --cc-purple: #8B5CF6;
+  --cc-pink: #EC4899;
+
+  --cc-bg: #F6F8FB;
+  --cc-card: #FFFFFF;
+  --cc-surface: #F1F5F9;
+
+  --cc-text: #0F172A;
+  --cc-text-2: #334155;
+  --cc-muted: #64748B;
+
+  --cc-border: rgba(15, 23, 42, 0.10);
+  --cc-border-2: rgba(15, 23, 42, 0.14);
+
+  --cc-shadow: 0 10px 30px rgba(2, 6, 23, 0.08);
+  --cc-shadow-hover: 0 18px 45px rgba(2, 6, 23, 0.14);
+}
+
+[data-bs-theme="dark"] {
+  --cc-bg: #0B1220;
+  --cc-card: #0F172A;
+  --cc-surface: #111C33;
+
+  --cc-text: #E5E7EB;
+  --cc-text-2: #CBD5E1;
+  --cc-muted: #94A3B8;
+
+  --cc-border: rgba(255, 255, 255, 0.10);
+  --cc-border-2: rgba(255, 255, 255, 0.14);
+
+  --cc-shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
+  --cc-shadow-hover: 0 20px 55px rgba(0, 0, 0, 0.45);
+}
+
+/* Device Detail Container */
+.device-detail-container {
+  padding: 20px;
+  background: linear-gradient(135deg, var(--cc-bg) 0%, rgba(37, 99, 235, 0.04) 100%);
+  min-height: calc(100vh - 80px);
+  border-radius: 22px;
+}
+
+/* Cards Styling */
+.device-detail-container .card {
+  background: var(--cc-card);
+  border: 1px solid var(--cc-border);
+  border-radius: 18px;
+  box-shadow: var(--cc-shadow);
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+}
+
+.device-detail-container .card:hover {
+  box-shadow: var(--cc-shadow-hover);
+  border-color: var(--cc-border-2);
+}
+
+/* Card Headers */
+.device-detail-container .card-header {
+  background: linear-gradient(135deg, #0e6167 0%, #04655eb7 55%, #0e6167 100%);
+  color: white;
+  border: none;
+  border-radius: 18px 18px 0 0 !important;
+  padding: 1rem 1.5rem;
+}
+
+[data-bs-theme="dark"] .device-detail-container .card-header {
+  background: linear-gradient(135deg, #17645e 0%, #141f3c 55%, #17645e 100%);
+}
+
+.device-detail-container .card-header h4,
+.device-detail-container .card-header h5 {
+  color: white;
+  font-weight: 700;
+  margin: 0;
+}
+
+.device-detail-container .card-header i {
+  color: rgba(255, 255, 255, 0.9);
+  margin-right: 10px;
+}
+
+/* Buttons Styling */
+.device-detail-container .btn {
+  border-radius: 12px;
+  font-weight: 600;
+  padding: 8px 16px;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.device-detail-container .btn-outline-primary {
+  color: var(--cc-primary);
+  border: 2px solid var(--cc-primary);
+  background: transparent;
+}
+
+.device-detail-container .btn-outline-primary:hover {
+  background: var(--cc-primary);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(37, 99, 235, 0.2);
+}
+
+.device-detail-container .btn-outline-secondary {
+  color: var(--cc-text-2);
+  border: 2px solid var(--cc-border);
+  background: transparent;
+}
+
+.device-detail-container .btn-outline-secondary:hover {
+  background: var(--cc-surface);
+  border-color: var(--cc-border-2);
+  transform: translateY(-2px);
+}
+
+.device-detail-container .btn-primary {
+  background: linear-gradient(135deg, var(--cc-primary), #1d4ed8);
+}
+
+.device-detail-container .btn-success {
+  background: linear-gradient(135deg, var(--cc-success), #16a34a);
+}
+
+.device-detail-container .btn-warning {
+  background: linear-gradient(135deg, var(--cc-warning), #d97706);
+  color: white;
+}
+
+.device-detail-container .btn-danger {
+  background: linear-gradient(135deg, var(--cc-danger), #dc2626);
+}
+
+.device-detail-container .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Alert Styling */
+.device-detail-container .alert-info {
+  background: linear-gradient(135deg, rgba(14, 165, 164, 0.1), rgba(14, 165, 164, 0.05));
+  border: 1px solid rgba(14, 165, 164, 0.2);
+  border-radius: 14px;
+  color: var(--cc-text);
+}
+
+/* Badge Styling */
+.device-detail-container .badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.device-detail-container .badge.bg-success {
+  background: linear-gradient(135deg, var(--cc-success), #16a34a) !important;
+}
+
+.device-detail-container .badge.bg-warning {
+  background: linear-gradient(135deg, var(--cc-warning), #d97706) !important;
+  color: white !important;
+}
+
+.device-detail-container .badge.bg-danger {
+  background: linear-gradient(135deg, var(--cc-danger), #dc2626) !important;
+}
+
+.device-detail-container .badge.bg-info {
+  background: linear-gradient(135deg, var(--cc-secondary), #0d9488) !important;
+  color: white !important;
+}
+
+/* Text Colors */
+.device-detail-container h6.text-muted {
+  color: var(--cc-muted) !important;
+  font-weight: 600;
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--cc-border);
+}
+
+.device-detail-container .text-muted {
+  color: var(--cc-muted) !important;
+}
+
+.device-detail-container strong {
+  color: var(--cc-text);
+  font-weight: 700;
+}
+
+/* List Styling */
+.device-detail-container .list-unstyled li {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--cc-border);
+}
+
+.device-detail-container .list-unstyled li:last-child {
+  border-bottom: none;
+}
+
+/* Table Styling */
+.device-detail-container .table {
+  color: var(--cc-text);
+  border-color: var(--cc-border);
+}
+
+.device-detail-container .table thead th {
+  background: var(--cc-surface);
+  color: var(--cc-text);
+  font-weight: 700;
+  border-color: var(--cc-border);
+  border-bottom: 2px solid var(--cc-primary);
+}
+
+.device-detail-container .table tbody tr {
+  border-color: var(--cc-border);
+}
+
+.device-detail-container .table-hover tbody tr:hover {
+  background: var(--cc-surface);
+}
+
+/* QR Code Section */
+.device-detail-container .card-body.text-center {
+  background: var(--cc-surface);
+  border-radius: 0 0 18px 18px;
+}
+
+.device-detail-container .img-fluid {
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Progress Bar */
+.device-detail-container .progress {
+  height: 10px;
+  background: var(--cc-surface);
+  border-radius: 10px;
+  border: 1px solid var(--cc-border);
+  overflow: hidden;
+}
+
+.device-detail-container .progress-bar {
+  background: linear-gradient(90deg, var(--cc-primary), var(--cc-secondary));
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+
+/* Form Styling */
+.device-detail-container .form-control,
+.device-detail-container .form-select {
+  background: var(--cc-surface);
+  border: 1px solid var(--cc-border);
+  color: var(--cc-text);
+  border-radius: 12px;
+  padding: 10px 15px;
+  transition: all 0.3s ease;
+}
+
+.device-detail-container .form-control:focus,
+.device-detail-container .form-select:focus {
+  background: var(--cc-surface);
+  border-color: var(--cc-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  color: var(--cc-text);
+}
+
+/* Modal Styling */
+.device-detail-container .modal-content {
+  background: var(--cc-card);
+  border: 1px solid var(--cc-border);
+  border-radius: 18px;
+}
+
+.device-detail-container .modal-header {
+  background: linear-gradient(135deg, #0e6167 0%, #04655eb7 55%, #0e6167 100%);
+  color: white;
+  border-radius: 18px 18px 0 0;
+  border: none;
+}
+
+.device-detail-container .modal-body {
+  color: var(--cc-text);
+}
+
+/* Quick Actions */
+.device-detail-container .d-grid.gap-2 .btn {
+  text-align: left;
+  padding: 12px 20px;
+}
+
+.device-detail-container .d-grid.gap-2 .btn i {
+  margin-right: 10px;
+  width: 20px;
+}
+
+/* Failure Prediction Card */
+.device-detail-container .card-body .fs-4 {
+  color: var(--cc-text);
+  font-weight: 800;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .device-detail-container {
+    padding: 10px;
+  }
+  
+  .device-detail-container .card {
+    margin-bottom: 15px;
+  }
+  
+  .device-detail-container .btn {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="device-detail-container">
+    <div class="row">
+        <!-- Device Information -->
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="bi bi-cpu"></i> {{ device.name }}</h4>
+                    <div class="btn-group">
+                        <a href="{% url 'device_edit' device.pk %}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-pencil"></i> Edit
+                        </a>
+                        <a href="{% url 'device_list' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-arrow-left"></i> Back
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if is_qr_access %}
+                    <div class="alert alert-info mb-4">
+                        <h6><i class="bi bi-qr-code-scan"></i> Accessed via QR Code</h6>
+                        <p class="mb-0">You are viewing the original device page opened by scanning a QR Code.</p>
+                    </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Basic Information</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Device ID:</strong> {{ device.device_id }}</li>
+                                <li><strong>Serial Number:</strong> {{ device.serial_number }}</li>
+                                <li><strong>Type:</strong> {{ device.get_device_type_display }}</li>
+                                <li><strong>Manufacturer:</strong> {{ device.manufacturer }}</li>
+                                <li><strong>Model:</strong> {{ device.model }}</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Status & Location</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Status:</strong>
+                                    {% if device.status == 'active' %}
+                                    <span class="badge bg-success">{{ device.get_status_display }}</span>
+                                    {% elif device.status == 'maintenance' %}
+                                    <span class="badge bg-warning">{{ device.get_status_display }}</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">{{ device.get_status_display }}</span>
+                                    {% endif %}
+                                </li>
+                                <li><strong>Department:</strong>
+                                    {% if device.department %}
+                                    {{ device.department.name }} (Floor {{ device.department.floor }})
+                                    {% else %}
+                                    <span class="text-muted">Not specified</span>
+                                    {% endif %}
+                                </li>
+                                <li><strong>Location:</strong> {{ device.location }}</li>
+                                <li><strong>Last Maintenance:</strong>
+                                    {% if device.last_maintenance %}
+                                    {{ device.last_maintenance|date:"Y/m/d" }}
+                                    {% else %}
+                                    <span class="text-muted">None</span>
+                                    {% endif %}
+                                </li>
+                                <li><strong>Next Maintenance:</strong>
+                                    {% if device.next_maintenance %}
+                                    {{ device.next_maintenance|date:"Y/m/d" }}
+                                    {% else %}
+                                    <span class="text-muted">Not specified</span>
+                                    {% endif %}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Financial Information</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Purchase Date:</strong> {{ device.purchase_date|date:"Y/m/d" }}</li>
+                                <li><strong>Warranty Expiry:</strong> {{ device.warranty_expiry|date:"Y/m/d" }}</li>
+                                <li><strong>Price:</strong> {{ device.price }} EGP</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Additional Information</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Created At:</strong> {{ device.created_at|date:"Y/m/d H:i" }}</li>
+                                <li><strong>Last Updated:</strong> {{ device.updated_at|date:"Y/m/d H:i" }}</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    {% if device.notes %}
+                    <div class="mt-4">
+                        <h6 class="text-muted">Notes</h6>
+                        <div class="alert alert-light border">
+                            {{ device.notes|linebreaks }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Maintenance History -->
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-tools"></i> Maintenance History</h5>
+                </div>
+                <div class="card-body">
+                    {% if maintenances %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Maintenance Type</th>
+                                    <th>Technician</th>
+                                    <th>Cost</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for maintenance in maintenances %}
+                                <tr>
+                                    <td>{{ maintenance.date|date:"Y/m/d" }}</td>
+                                    <td>
+                                        {% if maintenance.maintenance_type == 'preventive' %}
+                                        <span class="badge bg-info">Preventive</span>
+                                        {% elif maintenance.maintenance_type == 'corrective' %}
+                                        <span class="badge bg-warning">Corrective</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Emergency</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ maintenance.technician }}</td>
+                                    <td>{{ maintenance.cost }} EGP</td>
+                                    <td>
+                                        {% if maintenance.completed %}
+                                        <span class="badge bg-success">Completed</span>
+                                        {% else %}
+                                        <span class="badge bg-warning">In Progress</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-tools fs-1"></i>
+                        <p class="mt-2">No maintenance records for this device</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-lg-4">
+
+            <!-- QR Code Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-qr-code"></i> Device QR Code</h5>
+                </div>
+                <div class="card-body text-center">
+                    {% if device.qr_code %}
+                    <div class="mb-3">
+                        <img src="{{ device.qr_code.url }}" alt="QR Code" class="img-fluid" style="max-width: 250px;">
+                    </div>
+                    <p class="text-muted mb-2"><strong>Device ID:</strong> {{ device.device_id }}</p>
+                    <p class="text-muted mb-3">This code can be scanned to directly access this page</p>
+
+                    <div class="d-grid gap-2">
+                        <a href="{{ device.qr_code.url }}" download class="btn btn-primary">
+                            <i class="bi bi-download"></i> Download QR Code
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-qr-code-scan fs-1"></i>
+                        <p class="mt-2">QR Code not generated yet</p>
+                        <form method="post" action="{% url 'device_edit' device.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" name="generate_qr" class="btn btn-primary">
+                                <i class="bi bi-arrow-clockwise"></i> Generate QR Code
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Failure Prediction -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-activity"></i> Failure Prediction</h5>
+                </div>
+                <div class="card-body">
+                    {% if prediction %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <div class="text-muted small">Risk</div>
+                                <div class="fs-4 fw-bold">{{ prediction.risk_percent }}%</div>
+                            </div>
+
+                            {% if prediction.risk_level == "Critical" %}
+                                <span class="badge bg-danger">Critical</span>
+                            {% elif prediction.risk_level == "High" %}
+                                <span class="badge bg-warning">High</span>
+                            {% elif prediction.risk_level == "Medium" %}
+                                <span class="badge bg-info">Medium</span>
+                            {% else %}
+                                <span class="badge bg-success">Low</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="progress" style="height: 10px;">
+                                <div
+                                    class="progress-bar"
+                                    role="progressbar"
+                                    data-risk="{{ prediction.risk_percent }}"
+                                    aria-valuenow="{{ prediction.risk_percent }}"
+                                    aria-valuemin="0"
+                                    aria-valuemax="100">
+                                </div>
+                            </div>
+                        </div>
+
+                        <ul class="list-unstyled mb-3">
+                            <li><strong>Predicted failure window:</strong> {{ prediction.predicted_failure_date|date:"Y/m/d" }}</li>
+                            <li><strong>Confidence:</strong> {{ prediction.confidence }}</li>
+                        </ul>
+
+                        <div class="mb-2 text-muted small">Key drivers</div>
+                        <ul class="small mb-0">
+                            {% for d in prediction.drivers %}
+                                <li>{{ d }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <div class="text-muted">No prediction available.</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Add Maintenance -->
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-plus-circle"></i> Add Maintenance Record</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ maintenance_form|crispy }}
+                        <div class="d-grid mt-3">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-save"></i> Save Maintenance Record
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card shadow mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-lightning"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'device_edit' device.pk %}" class="btn btn-warning">
+                            <i class="bi bi-pencil"></i> Edit Device
+                        </a>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            <i class="bi bi-trash"></i> Delete Device
+                        </button>
+                        <a href="{% url 'device_list' %}" class="btn btn-secondary">
+                            <i class="bi bi-list"></i> View All Devices
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the device <strong>"{{ device.name }}"</strong>?</p>
+                    <p class="text-danger">This action cannot be undone!</p>
+                </div>
+                <div class="modal-footer">
+                    <form method="post" action="{% url 'device_delete' device.pk %}">
+                        {% csrf_token %}
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Device Data for JavaScript -->
+<div id="device-data" 
+     data-edit-url="{% url 'device_edit' device.pk %}"
+     data-csrf-token="{{ csrf_token }}"
+     style="display: none;">
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // الحصول على البيانات من data attributes
+    const deviceData = document.getElementById('device-data');
+    const deviceEditUrl = deviceData?.dataset.editUrl;
+    const csrfToken = deviceData?.dataset.csrfToken;
+    
+    // Set progress bar widths
+    document.querySelectorAll('.progress-bar[data-risk]').forEach(function (bar) {
+        const risk = parseInt(bar.getAttribute('data-risk') || '0', 10);
+        const safe = Math.max(0, Math.min(100, risk));
+        bar.style.width = safe + '%';
+        
+        // Set color based on risk level
+        if (risk >= 70) {
+            bar.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
+        } else if (risk >= 40) {
+            bar.style.background = 'linear-gradient(90deg, #f59e0b, #d97706)';
+        } else {
+            bar.style.background = 'linear-gradient(90deg, #22c55e, #16a34a)';
+        }
+    });
+
+    // Generate QR Code
+    const generateBtn = document.querySelector('button[name="generate_qr"]');
+    if (generateBtn && deviceEditUrl && csrfToken) {
+        generateBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (confirm('Do you want to generate a new QR Code for this device?')) {
+                fetch(deviceEditUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'generate_qr=true'
+                }).then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Failed to generate QR code');
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to generate QR code');
+                });
+            }
+        });
+    }
+    
+    // Add animation to cards
+    const cards = document.querySelectorAll('.device-detail-container .card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 100 * index);
+    });
+});
+</script>
+{% endblock %}

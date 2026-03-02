@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login | DeviceCare System{% endblock %}
+
+{% block content %}
+<div class="login-page"
+     style="--bg-url: url('{% static 'img/login_bg.jpg' %}');">
+
+  <div class="login-bg"></div>
+  <div class="login-overlay"></div>
+
+  <div class="login-wrap container-fluid">
+    <div class="login-panel">
+
+{% load static %}
+
+<div class="panel-head text-center">
+<img src="{% static 'img/logo.png' %}?v={% now 'U' %}"
+         alt="DeviceCare Logo"
+         class="panel-logo mb-3">
+
+    <h1 class="panel-title">DeviceCare System</h1>
+    <p class="panel-subtitle">Hospital Equipment Management</p>
+</div>
+
+      <form method="post" novalidate class="panel-form">
+        {% csrf_token %}
+
+        <div class="field">
+          <span class="field-ic"><i class="bi bi-person"></i></span>
+          {{ form.username }}
+          <label class="field-label">Username</label>
+        </div>
+
+        <div class="field">
+          <span class="field-ic"><i class="bi bi-lock"></i></span>
+          {{ form.password }}
+          <label class="field-label">Password</label>
+        </div>
+
+        <div class="form-row">
+          <label class="remember">
+            <input type="checkbox" name="remember" />
+            <span>Remember me</span>
+          </label>
+          <a class="forgot" href="#">Forgot password?</a>
+        </div>
+
+        {% if form.errors %}
+        <div class="err">
+          <i class="bi bi-exclamation-triangle"></i>
+          Invalid username or password
+        </div>
+        {% endif %}
+
+        <button type="submit" class="btn-login">
+          <i class="bi bi-box-arrow-in-right"></i>
+          Login
+        </button>
+
+        <div class="foot">
+          <i class="bi bi-shield-lock"></i>
+          Authorized staff only
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<style>
+.login-page{position:relative;min-height:100vh;overflow:hidden;background:#050814;}
+.login-bg{
+  position:absolute;inset:0;
+  background-image: var(--bg-url);
+  background-position:center;
+  background-size:cover;
+  background-repeat:no-repeat;
+  transform:scale(1.02);
+  filter:saturate(1.05) contrast(1.05);
+}
+.login-overlay{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(900px 600px at 70% 45%, rgba(59,130,246,.20), transparent 60%),
+    radial-gradient(700px 500px at 35% 30%, rgba(14,165,233,.12), transparent 60%),
+    linear-gradient(135deg, rgba(3,7,18,.88), rgba(3,7,18,.78));
+}
+.login-wrap{
+  position:relative;z-index:2;min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  padding:28px 16px;
+}
+.login-panel{
+  width:min(520px,92vw);
+  padding:28px;
+  border-radius:22px;
+  background:rgba(10,18,40,.45);
+  border:1px solid rgba(148,163,184,.22);
+  box-shadow:0 30px 80px rgba(0,0,0,.60);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  position:relative;
+  animation:up .45s ease;
+}
+.panel-badge{
+  width:84px;height:84px;border-radius:20px;
+  background:rgba(255,255,255,.92);
+  border:1px solid rgba(255,255,255,.35);
+  box-shadow:0 14px 35px rgba(0,0,0,.55);
+  display:grid;place-items:center;
+  margin:0 auto 14px auto;
+}
+.panel-badge img{width:100%;height:100%;object-fit:contain;padding:10px;}
+.panel-head{text-align:center;margin-bottom:18px;}
+.panel-title,
+.remember,
+.panel-subtitle{
+  color:#ffffff !important;
+}
+
+.panel-title{
+  margin:0;
+  font-weight:950;
+  letter-spacing:.2px;
+  color:#ffffff; /* ثابت أبيض */
+  text-shadow:0 2px 18px rgba(0,0,0,.7);
+  font-size:1.9rem;
+}
+.panel-subtitle{
+  margin:6px 0 0 0;
+  color:#ffffff; /* ثابت أبيض */
+  font-weight:700;
+}
+
+.remember{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  color:#ffffff !important;   /* ثابت أبيض مهما كان الثيم */
+  font-weight:750;
+}
+.panel-form{margin-top:14px;}
+.field{position:relative;margin-bottom:14px;}
+.field-ic{
+  position:absolute;left:14px;top:50%;transform:translateY(-50%);
+  width:34px;height:34px;border-radius:12px;
+  display:grid;place-items:center;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(148,163,184,.20);
+  color:rgba(226,232,240,.92);
+}
+.field input{
+  width:100%;
+  padding:14px 14px 14px 56px;
+  border-radius:14px;
+  border:1.5px solid rgba(148,163,184,.30);
+  background:rgba(15,26,51,.72);
+  color:rgba(248,250,252,.97);
+  font-weight:800;
+  outline:none;
+  transition:.2s ease;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+}
+.field input::placeholder{color:rgba(226,232,240,.55);}
+.field input:focus{
+  border-color:rgba(59,130,246,.90);
+  box-shadow:0 0 0 4px rgba(59,130,246,.22);
+  transform:translateY(-1px);
+}
+.field-label{
+  position:absolute;left:56px;top:-10px;
+  font-size:.82rem;font-weight:900;
+  color:rgba(203, 216, 233, 0.78);
+  background:rgb(7, 73, 42);
+  padding:2px 8px;border-radius:999px;
+  border:1px solid rgba(52, 51, 55, 0.901);
+}
+.form-row{
+  display:flex;justify-content:space-between;align-items:center;
+  margin:10px 0 14px 0;gap:10px;
+}
+.remember input{width:16px;height:16px;accent-color:#ffffff;} .forgot{color:rgb(255, 255, 255);font-weight:850;text-decoration:none;} 
+.forgot{color:rgb(255, 255, 255);font-weight:850;text-decoration:none;}
+.forgot:hover{text-decoration:underline;}
+.err{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px;border-radius:14px;
+  background:rgba(255, 255, 255, 0.14);
+  border:1px solid rgba(239,68,68,.25);
+  color:rgba(254,226,226,.95);
+  font-weight:850;margin-bottom:14px;
+}
+.btn-login{
+  width:100%;
+  border:0;border-radius:14px;
+  padding:13px 14px;
+  font-weight:950;letter-spacing:.3px;
+  color:#fff;
+  background:linear-gradient(135deg,#2563eb,#1e40af);
+  box-shadow:0 16px 40px rgba(37, 100, 235, 0.027);
+  transition:.2s ease;
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+}
+.btn-login:hover{
+  transform:translateY(-2px);
+  filter:brightness(1.06);
+  box-shadow:0 22px 55px rgba(37,99,235,.34);
+}
+.foot{margin-top:14px;text-align:center;color:rgb(255, 255, 255);font-weight:750;}
+@media (max-width:480px){
+  .login-panel{padding:20px;border-radius:18px;}
+  .panel-title{font-size:1.55rem;}
+  .panel-badge{width:74px;height:74px;border-radius:18px;}
+}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+/* FORCE Remember me to always be white (label + span + any children) */
+.form-row label.remember,
+.form-row label.remember span,
+.form-row label.remember *{
+  color: #fff !important;
+}
+/* ===== FORCE WHITE FOR FOOT NOTE ===== */
+.login-panel .foot,
+.login-panel .foot *{
+  color:#ffffff !important;
+}
+.panel-logo {
+    height: 100px;        /* واضح ومش مبالغ */
+    width: auto;
+    object-fit: contain;
+}
+
+.panel-title {
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.panel-subtitle {
+    color: #6b7280;
+    font-size: 0.95rem;
+}
+
+
+</style>
+{% endblock %}

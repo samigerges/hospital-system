@@ -1,0 +1,739 @@
+<!-- templates/dashboard.html -->
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - DeviceCare System{% endblock %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-12 col-md-8">
+        <h1 class="h2 mb-1 fw-bold">
+            <i class="bi bi-speedometer2 me-2 text-primary"></i>Equipment Management Dashboard
+        </h1>
+        <p class="text-muted mb-0">Welcome back, <strong class="text-primary">{{ user.username }}</strong>! Here is your system overview.</p>
+    </div>
+    <div class="col-12 col-md-4 text-md-end mt-2 mt-md-0">
+        <span class="badge bg-primary text-white border-0 shadow-sm">
+            <i class="bi bi-calendar-check me-1"></i> {% now "F j, Y" %}
+        </span>
+    </div>
+</div>
+<!-- Key Metrics Cards Section -->
+<div class="row g-3 g-lg-4 mb-4">
+    <!-- Total Devices Card -->
+    <div class="col-6 col-md-3">
+        <div class="card stat-card border-0 shadow-sm h-100 hover-lift theme-transition">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="text-uppercase small fw-bold mb-1">Total Devices</h6>
+                        <h2 class="mb-0 fw-bold">{{ total_devices }}</h2>
+                        <p class="text-muted small mb-0">
+                            <i class="bi bi-cpu me-1 text-primary"></i> All registered devices
+                        </p>
+                    </div>
+                    <div class="icon-stat bg-primary text-white rounded-3">
+                        <i class="bi bi-cpu fs-4"></i>
+                    </div>
+                </div>
+                <div class="mt-2 pt-2 border-top border-light">
+                    <small class="text-success fw-semibold">
+                        <i class="bi bi-arrow-up-right me-1"></i>
+                        <span>{{ active_devices }}</span> active 
+                        <span>({{ active_percentage|floatformat:0 }}%)</span>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Active Devices Card -->
+    <div class="col-6 col-md-3">
+        <div class="card stat-card border-0 shadow-sm h-100 hover-lift theme-transition">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="text-uppercase small fw-bold mb-1">Active Devices</h6>
+                        <h2 class="mb-0 fw-bold">{{ active_devices }}</h2>
+                        <p class="text-muted small mb-0">
+                            <i class="bi bi-check-circle me-1 text-success"></i> Operating normally
+                        </p>
+                    </div>
+                    <div class="icon-stat bg-success text-white rounded-3">
+                        <i class="bi bi-check-circle fs-4"></i>
+                    </div>
+                </div>
+                <div class="mt-2 pt-2 border-top border-light">
+                    <small class="text-muted">
+                        <strong>{{ active_percentage|floatformat:0 }}%</strong> of total devices
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Maintenance Card -->
+    <div class="col-6 col-md-3">
+        <div class="card stat-card border-0 shadow-sm h-100 hover-lift theme-transition">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="text-uppercase small fw-bold mb-1">Under Maintenance</h6>
+                        <h2 class="mb-0 fw-bold">{{ maintenance_devices }}</h2>
+                        <p class="text-muted small mb-0">
+                            <i class="bi bi-tools me-1 text-warning"></i> Need attention
+                        </p>
+                    </div>
+                    <div class="icon-stat bg-warning text-white rounded-3">
+                        <i class="bi bi-tools fs-4"></i>
+                    </div>
+                </div>
+                <div class="mt-2 pt-2 border-top border-light">
+                    <small class="fw-semibold text-warning">
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        {% if upcoming_maintenance|length > 0 %}
+                        {{ upcoming_maintenance|length }} due soon
+                        {% else %}
+                        No upcoming maintenance
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Departments Card -->
+    <div class="col-6 col-md-3">
+        <div class="card stat-card border-0 shadow-sm h-100 hover-lift theme-transition">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="text-uppercase small fw-bold mb-1">Departments</h6>
+                        <h2 class="mb-0 fw-bold">{{ total_departments }}</h2>
+                        <p class="text-muted small mb-0">
+                            <i class="bi bi-layers me-1 text-info"></i> All departments
+                        </p>
+                    </div>
+                    <div class="icon-stat bg-info text-white rounded-3">
+                        <i class="bi bi-layers fs-4"></i>
+                    </div>
+                </div>
+                <div class="mt-2 pt-2 border-top border-light">
+                    <small class="fw-semibold text-info">
+                        <i class="bi bi-diagram-3 me-1"></i>
+                        Devices distributed
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Status Overview and Quick Actions Section -->
+<div class="row g-4 mb-4">
+    <!-- Status Overview Panel -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 h-100 theme-transition">
+            <div class="card-header bg-surface border-bottom py-3">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-pie-chart me-2 text-primary"></i>Device Status Overview
+                </h5>
+            </div>
+
+            <div class="card-body p-3 p-md-4">
+                <div class="row g-3">
+
+                    <!-- Active -->
+                    <div class="col-md-3">
+                        <div class="status-box rounded-3 p-3 text-center shadow-sm hover-lift clickable-status"
+                             data-url="{% url 'device_list' %}?status=active"
+                             style="background: linear-gradient(135deg, rgba(var(--success-500-rgb), 0.15), rgba(var(--success-400-rgb), 0.1));">
+                            <div class="display-5 fw-bold mb-1">{{ active_devices }}</div>
+                            <div class="fw-semibold text-success">Active</div>
+                            <div class="small text-muted mt-1">
+                                {{ active_percentage|floatformat:1 }}% of total
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Maintenance -->
+                    <div class="col-md-3">
+                        <div class="status-box rounded-3 p-3 text-center shadow-sm hover-lift clickable-status"
+                             data-url="{% url 'device_list' %}?status=maintenance"
+                             style="background: linear-gradient(135deg, rgba(var(--warning-500-rgb), 0.15), rgba(var(--warning-400-rgb), 0.1));">
+                            <div class="display-5 fw-bold mb-1">{{ maintenance_devices }}</div>
+                            <div class="fw-semibold text-warning">Maintenance</div>
+                            <div class="small text-muted mt-1">
+                                {{ maintenance_percentage|floatformat:1 }}% of total
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Inactive -->
+                    <div class="col-md-3">
+                        <div class="status-box rounded-3 p-3 text-center shadow-sm hover-lift clickable-status"
+                             data-url="{% url 'device_list' %}?status=inactive"
+                             style="background: linear-gradient(135deg, rgba(var(--danger-500-rgb), 0.15), rgba(var(--danger-400-rgb), 0.1));">
+                            <div class="display-5 fw-bold mb-1">{{ inactive_devices }}</div>
+                            <div class="fw-semibold text-danger">Inactive</div>
+                            <div class="small text-muted mt-1">
+                                {{ inactive_percentage|floatformat:1 }}% of total
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Departments -->
+                    <div class="col-md-3">
+                        <div class="status-box rounded-3 p-3 text-center shadow-sm hover-lift clickable-status"
+                             data-url="{% url 'departments_list' %}"
+                             style="background: linear-gradient(135deg, rgba(var(--info-500-rgb), 0.15), rgba(var(--info-400-rgb), 0.1));">
+                            <div class="display-5 fw-bold mb-1">{{ total_departments }}</div>
+                            <div class="fw-semibold text-info">Departments</div>
+                            <div class="small text-muted mt-1">Usage units</div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Status Legend -->
+                <div class="mt-4 pt-3 border-top border-light">
+                    <h6 class="small text-uppercase fw-bold mb-2">Status Legend</h6>
+                    <div class="row text-center">
+                        <div class="col">
+                            <span class="badge bg-success me-1"></span>
+                            <small class="fw-semibold">
+                                Active ({{ active_percentage|floatformat:0 }}%)
+                            </small>
+                        </div>
+                        <div class="col">
+                            <span class="badge bg-warning me-1"></span>
+                            <small class="fw-semibold">
+                                Maintenance ({{ maintenance_percentage|floatformat:0 }}%)
+                            </small>
+                        </div>
+                        <div class="col">
+                            <span class="badge bg-danger me-1"></span>
+                            <small class="fw-semibold">
+                                Inactive ({{ inactive_percentage|floatformat:0 }}%)
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions Panel -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 h-100 theme-transition">
+            <div class="card-header bg-surface border-bottom py-3">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-lightning-charge me-2 text-primary"></i>Quick Actions
+                </h5>
+            </div>
+            <div class="card-body p-3">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'device_add' %}" class="btn btn-primary btn-hover-scale fw-semibold">
+                        <i class="bi bi-plus-circle me-2"></i>Add New Device
+                    </a>
+                    <a href="{% url 'device_list' %}" class="btn btn-outline-primary btn-hover-scale fw-semibold">
+                        <i class="bi bi-list-ul me-2"></i>View All Devices
+                    </a>
+                    <a href="{% url 'department_add' %}" class="btn btn-info btn-hover-scale fw-semibold">
+                        <i class="bi bi-layers me-2"></i>Add New Department
+                    </a>
+                    <a href="{% url 'admin:index' %}" target="_blank" class="btn btn-outline-secondary btn-hover-scale fw-semibold">
+                        <i class="bi bi-gear me-2"></i>Admin Panel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Main Content Tables Section -->
+<div class="row g-4">
+    <!-- Recently Added Devices Table -->
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 h-100 theme-transition">
+            <div class="card-header bg-surface border-bottom py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-clock-history me-2 text-primary"></i>Recently Added Devices
+                </h5>
+                <span class="badge bg-primary text-white rounded-pill">{{ recent_devices|length }}</span>
+            </div>
+            <div class="card-body p-0">
+                {% if recent_devices %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="bg-surface">
+                            <tr>
+                                <th class="ps-3 fw-semibold">Device Name</th>
+                                <th class="fw-semibold">Type</th>
+                                <th class="fw-semibold">Status</th>
+                                <th class="text-end pe-3 fw-semibold">Added Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for device in recent_devices %}
+                            <tr class="clickable-row" data-url="{% url 'device_detail' device.pk %}">
+                                <td class="ps-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-2">
+                                            <i class="bi bi-cpu text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-medium">{{ device.name|truncatechars:20 }}</div>
+                                            <small class="text-muted">SN: {{ device.serial_number|default:"Not assigned"|truncatechars:12 }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-surface border border-light">
+                                        {{ device.get_device_type_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if device.status == 'active' %}
+                                    <span class="badge rounded-pill text-white" 
+                                          style="background: linear-gradient(135deg, var(--app-success), var(--success-700)); border: none;">
+                                        <i class="bi bi-circle-fill small me-1"></i>
+                                        {{ device.get_status_display }}
+                                    </span>
+                                    {% elif device.status == 'maintenance' %}
+                                    <span class="badge rounded-pill text-white" 
+                                          style="background: linear-gradient(135deg, var(--app-warning), var(--warning-700)); border: none;">
+                                        <i class="bi bi-circle-fill small me-1"></i>
+                                        {{ device.get_status_display }}
+                                    </span>
+                                    {% elif device.status == 'inactive' %}
+                                    <span class="badge rounded-pill text-white" 
+                                          style="background: linear-gradient(135deg, var(--app-danger), var(--danger-700)); border: none;">
+                                        <i class="bi bi-circle-fill small me-1"></i>
+                                        {{ device.get_status_display }}
+                                    </span>
+                                    {% else %}
+                                    <span class="badge rounded-pill text-white" 
+                                          style="background: linear-gradient(135deg, var(--neutral-500), var(--neutral-700)); border: none;">
+                                        <i class="bi bi-circle-fill small me-1"></i>
+                                        {{ device.get_status_display }}
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end pe-3">
+                                    <small class="text-muted">{{ device.created_at|date:"M d, Y" }}</small>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox display-6 text-muted"></i>
+                    <p class="mt-3 text-muted">No recently added devices</p>
+                    <a href="{% url 'device_add' %}" class="btn btn-sm btn-primary mt-2 fw-semibold">
+                        <i class="bi bi-plus-circle"></i> Add First Device
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-footer bg-surface border-top py-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <small>Showing recent {{ recent_devices|length }} records</small>
+                    <a href="{% url 'device_list' %}" class="btn btn-sm btn-outline-primary fw-semibold">
+                        View All <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+<!-- Upcoming Maintenance Table -->
+<div class="col-lg-6">
+    <div class="card shadow-sm border-0 h-100 theme-transition">
+
+        <!-- HEADER (كان ناقص) -->
+        <div class="card-header bg-surface border-bottom py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">
+                <i class="bi bi-calendar-check me-2 text-primary"></i>
+                Upcoming Maintenance
+            </h5>
+            <span class="badge bg-warning text-dark rounded-pill">
+                {{ upcoming_maintenance|length }}
+            </span>
+        </div>
+
+        <!-- BODY -->
+        <div class="card-body p-0">
+            {% if upcoming_maintenance %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="bg-surface">
+                        <tr>
+                            <th class="ps-3 fw-semibold" style="width:40px;">#</th>
+                            <th class="fw-semibold">Device</th>
+                            <th class="fw-semibold">Due Date</th>
+                            <th class="fw-semibold">Priority</th>
+                            <th class="text-end pe-3 fw-semibold">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for device in upcoming_maintenance|slice:":6" %}
+                        <tr>
+                            <td class="ps-3 fw-bold text-muted">{{ forloop.counter }}</td>
+
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-tools text-warning me-2"></i>
+                                    <div>
+                                        <div class="fw-medium">{{ device.name|truncatechars:18 }}</div>
+                                        <small class="text-muted">
+                                            {{ device.department.name|default:"No Dept" }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                {{ device.next_maintenance|date:"M d, Y"|default:"Not set" }}
+                                <div class="small text-muted">
+                                    {{ device.days_until_maintenance }} days remaining
+                                </div>
+                            </td>
+
+                            <td>
+                                {% if device.is_maintenance_overdue %}
+                                <span class="badge bg-danger">Critical</span>
+                                {% elif device.is_maintenance_urgent %}
+                                <span class="badge bg-warning text-dark">High</span>
+                                {% else %}
+                                <span class="badge bg-success">Normal</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="text-end pe-3">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'device_detail' device.pk %}" class="btn btn-outline-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{% url 'device_edit' device.pk %}" class="btn btn-outline-secondary">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-calendar2-check display-6 text-muted"></i>
+                <p class="mt-3 text-muted">No upcoming maintenance</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- FOOTER (كان ناقص) -->
+        <div class="card-footer bg-surface border-top py-2 d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+                Showing {{ upcoming_maintenance|length }} maintenance items
+            </small>
+            <a href="{% url 'device_list' %}?status=maintenance"
+               class="btn btn-sm btn-outline-primary fw-semibold">
+                View All <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<!-- Statistics Summary Section -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow-sm border-0 theme-transition">
+            <div class="card-header bg-surface border-bottom py-3">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-graph-up-arrow me-2 text-primary"></i>Statistics Overview
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <!-- Total Devices Stat -->
+                    <div class="col-md-3 col-6 mb-3">
+                        <div class="border rounded-3 p-3 h-100 d-flex flex-column justify-content-center hover-lift theme-transition border-light">
+                            <div class="icon-stat-lg bg-primary text-white rounded-circle mx-auto mb-3">
+                                <i class="bi bi-cpu fs-2"></i>
+                            </div>
+                            <h3 class="fw-bold">{{ total_devices }}</h3>
+                            <p class="text-muted mb-0 small">Total Devices</p>
+                            <div class="mt-2 small">
+                                <span class="text-success">{{ active_devices }} active</span> | 
+                                <span class="text-warning">{{ maintenance_devices }} maintenance</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Departments Stat -->
+                    <div class="col-md-3 col-6 mb-3">
+                        <div class="border rounded-3 p-3 h-100 d-flex flex-column justify-content-center hover-lift theme-transition border-light">
+                            <div class="icon-stat-lg bg-info text-white rounded-circle mx-auto mb-3">
+                                <i class="bi bi-layers fs-2"></i>
+                            </div>
+                            <h3 class="fw-bold">{{ total_departments }}</h3>
+                            <p class="text-muted mb-0 small">Departments</p>
+                            <div class="mt-2 small">
+                                <span class="text-info">Devices distributed</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Maintenance Stat -->
+                    <div class="col-md-3 col-6 mb-3">
+                        <div class="border rounded-3 p-3 h-100 d-flex flex-column justify-content-center hover-lift theme-transition border-light">
+                            <div class="icon-stat-lg bg-warning text-white rounded-circle mx-auto mb-3">
+                                <i class="bi bi-tools fs-2"></i>
+                            </div>
+                            <h3 class="fw-bold">{{ maintenance_devices }}</h3>
+                            <p class="text-muted mb-0 small">Devices Needing Maintenance</p>
+                            <div class="mt-2 small">
+                                {% if upcoming_maintenance|length > 0 %}
+                                <span class="text-warning">{{ upcoming_maintenance|length }} due soon</span>
+                                {% else %}
+                                <span class="text-success">All maintenance normal</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Health Percentage Stat -->
+                    <div class="col-md-3 col-6 mb-3">
+                        <div class="border rounded-3 p-3 h-100 d-flex flex-column justify-content-center hover-lift theme-transition border-light">
+                            <div class="icon-stat-lg bg-success text-white rounded-circle mx-auto mb-3">
+                                <i class="bi bi-check-circle fs-2"></i>
+                            </div>
+                            <h3 class="fw-bold">{{ active_percentage|floatformat:0 }}%</h3>
+                            <p class="text-muted mb-0 small">Device Health Rate</p>
+                            <div class="mt-2 small">
+                                <span class="text-success">{{ active_devices }} devices running normally</span>
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                            <!-- في نهاية dashboard.html -->
+                            <div class="text-center mt-5">
+                                <a href="{% url 'control_center' %}" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-house-gear me-2"></i> Back to Control Center
+                                </a>
+                            </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Custom Dashboard Styles */
+.stat-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+    border-color: var(--border-medium);
+}
+
+.status-box {
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-light);
+    background: var(--bg-card);
+}
+
+.status-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
+    border-color: var(--border-medium);
+}
+
+.icon-stat {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-default);
+}
+
+.icon-stat-lg {
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-default);
+}
+
+.icon-stat:hover, .icon-stat-lg:hover {
+    transform: scale(1.05);
+}
+
+.btn-hover-scale:hover {
+    transform: scale(1.02);
+    transition: transform 0.2s ease;
+}
+
+.clickable-row {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.clickable-row:hover {
+    background-color: var(--bg-surface) !important;
+}
+
+/* Status Badge Styles */
+.status-active {
+    background: linear-gradient(135deg, 
+        rgba(var(--success-500-rgb), 0.15), 
+        rgba(var(--success-400-rgb), 0.1));
+    color: var(--app-success);
+    border: 1px solid rgba(var(--success-500-rgb), 0.2);
+}
+
+.status-maintenance {
+    background: linear-gradient(135deg, 
+        rgba(var(--warning-500-rgb), 0.15), 
+        rgba(var(--warning-400-rgb), 0.1));
+    color: var(--app-warning);
+    border: 1px solid rgba(var(--warning-500-rgb), 0.2);
+}
+
+.status-inactive {
+    background: linear-gradient(135deg, 
+        rgba(var(--danger-500-rgb), 0.15), 
+        rgba(var(--danger-400-rgb), 0.1));
+    color: var(--app-danger);
+    border: 1px solid rgba(var(--danger-500-rgb), 0.2);
+}
+
+/* Animation Classes */
+.hover-lift {
+    transition: var(--transition-default);
+}
+
+.hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .display-5 {
+        font-size: 1.8rem;
+    }
+    
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    .icon-stat {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .icon-stat i {
+        font-size: 1.2rem !important;
+    }
+}
+
+/* Card entrance animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+.card:nth-child(1) { animation-delay: 0.1s; }
+.card:nth-child(2) { animation-delay: 0.2s; }
+.card:nth-child(3) { animation-delay: 0.3s; }
+.card:nth-child(4) { animation-delay: 0.4s; }
+.card:nth-child(5) { animation-delay: 0.5s; }
+.card:nth-child(6) { animation-delay: 0.6s; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Make table rows clickable
+    document.querySelectorAll('.clickable-row').forEach(row => {
+        row.addEventListener('click', function() {
+            const url = this.dataset.url;
+            if (url) window.location.href = url;
+        });
+    });
+    
+    // Add hover effect to status boxes
+    document.querySelectorAll('.status-box').forEach(box => {
+        box.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-3px)';
+        });
+        box.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Add animation delay to cards
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+    });
+    
+    // Initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Theme transition helper
+    function applyThemeTransition(elements) {
+        elements.forEach(element => {
+            element.classList.add('theme-transition');
+        });
+    }
+    
+    // Apply theme transition to interactive elements
+    applyThemeTransition(document.querySelectorAll('.btn, .badge, .card, .status-box'));
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    document.querySelectorAll('.clickable-status').forEach(box => {
+        box.style.cursor = 'pointer';
+
+        box.addEventListener('click', function () {
+            const url = this.dataset.url;
+            if (url) {
+                window.location.href = url;
+            }
+        });
+    });
+
+});
+</script>
+
+{% endblock %}

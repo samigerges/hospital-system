@@ -1,0 +1,1469 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Team Profile - DeviceCare{% endblock %}
+
+{% block extra_css %}
+<style>
+/* =========================================================
+   THEME - Clean Medical (Same as Control Center)
+   ========================================================= */
+:root {
+  --tp-primary: #2563EB;      /* medical blue */
+  --tp-secondary: #0EA5A4;    /* teal */
+  --tp-success: #22C55E;
+  --tp-warning: #F59E0B;
+  --tp-danger: #EF4444;
+  --tp-purple: #8B5CF6;
+  --tp-pink: #EC4899;
+
+  --tp-bg: #F6F8FB;
+  --tp-card: #FFFFFF;
+  --tp-surface: #F1F5F9;
+
+  --tp-text: #0F172A;
+  --tp-text-2: #334155;
+  --tp-muted: #64748B;
+
+  --tp-border: rgba(15, 23, 42, 0.10);
+  --tp-border-2: rgba(15, 23, 42, 0.14);
+
+  --tp-shadow: 0 10px 30px rgba(2, 6, 23, 0.08);
+  --tp-shadow-hover: 0 18px 45px rgba(2, 6, 23, 0.14);
+  --tp-shadow-lg: 0 25px 50px rgba(2, 6, 23, 0.15);
+}
+
+[data-bs-theme="dark"] {
+  --tp-bg: #0B1220;
+  --tp-card: #0F172A;
+  --tp-surface: #111C33;
+
+  --tp-text: #E5E7EB;
+  --tp-text-2: #CBD5E1;
+  --tp-muted: #94A3B8;
+
+  --tp-border: rgba(255, 255, 255, 0.10);
+  --tp-border-2: rgba(255, 255, 255, 0.14);
+
+  --tp-shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
+  --tp-shadow-hover: 0 20px 55px rgba(0, 0, 0, 0.45);
+  --tp-shadow-lg: 0 30px 60px rgba(0, 0, 0, 0.5);
+}
+
+/* =========================================================
+   Layout & Container
+   ========================================================= */
+.team-profile-container {
+  padding: 20px;
+  background: linear-gradient(135deg, var(--tp-bg) 0%, rgba(37, 99, 235, 0.04) 100%);
+  min-height: calc(100vh - 80px);
+  border-radius: 22px;
+}
+
+/* =========================================================
+   Hero Section (Matching Control Center Style)
+   ========================================================= */
+.team-hero-section {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  padding: 42px;
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background:
+    radial-gradient(900px 520px at 18% 18%, rgba(255, 255, 255, 0.10), transparent 62%),
+    linear-gradient(135deg, #0e6167 0%, #04655eb7 55%, #0e6167 100%);
+  box-shadow: var(--tp-shadow-lg);
+  margin-bottom: 30px;
+}
+
+.team-hero-section::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 6px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0));
+  opacity: 0.25;
+}
+
+[data-bs-theme="dark"] .team-hero-section {
+  border-color: rgba(255, 255, 255, 0.10);
+  background:
+    radial-gradient(900px 520px at 18% 18%, rgba(255, 255, 255, 0.06), transparent 62%),
+    linear-gradient(135deg, #17645e 0%, #141f3c 55%, #17645e 100%);
+}
+
+.hero-title {
+  font-size: 2.6rem;
+  font-weight: 900;
+  color: #ffffff;
+  margin-bottom: 10px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+}
+
+.hero-subtitle {
+  font-size: 1.15rem;
+  opacity: 0.92;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 28px;
+  max-width: 700px;
+}
+
+.hero-badges {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.hero-badges .badge {
+  padding: 10px 20px;
+  font-weight: 700;
+  border-radius: 50px;
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.hero-badges .badge:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.hero-icon {
+  font-size: 8rem;
+  color: rgba(255, 255, 255, 0.1);
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+/* =========================================================
+   Section Titles
+   ========================================================= */
+.section-title {
+  font-size: 1.8rem;
+  font-weight: 900;
+  margin-bottom: 1rem;
+  color: var(--tp-text);
+  position: relative;
+  padding-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--tp-primary), var(--tp-secondary));
+  border-radius: 2px;
+}
+
+.section-title i {
+  color: var(--tp-primary);
+}
+
+.section-subtitle {
+  color: var(--tp-muted);
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  font-weight: 600;
+}
+
+/* =========================================================
+   Supervisor Card
+   ========================================================= */
+.supervisor-section {
+  padding: 40px 0;
+}
+
+.supervisor-card {
+  background: var(--tp-card);
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: var(--tp-shadow);
+  border: 1px solid var(--tp-border);
+  transition: transform 0.3s ease;
+}
+
+.supervisor-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--tp-shadow-hover);
+  border-color: var(--tp-border-2);
+}
+
+.supervisor-avatar-wrapper {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  margin: 0 auto;
+}
+
+.supervisor-avatar-placeholder {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--tp-primary), var(--tp-secondary));
+  color: white;
+  font-size: 4rem;
+  box-shadow: 0 15px 35px rgba(37, 99, 235, 0.3);
+  border: 6px solid var(--tp-card);
+}
+
+.supervisor-photo {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  border: 6px solid var(--tp-card);
+}
+
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.info-item i {
+  color: var(--tp-primary);
+  font-size: 1.2rem;
+  margin-top: 0.2rem;
+  min-width: 24px;
+}
+
+.info-item div {
+  flex: 1;
+}
+
+.info-item strong {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--tp-muted);
+  margin-bottom: 0.25rem;
+  font-weight: 700;
+}
+
+.info-item p {
+  margin: 0;
+  color: var(--tp-text);
+  font-weight: 600;
+}
+
+.supervisor-bio {
+  background: var(--tp-surface);
+  padding: 1.2rem;
+  border-radius: 14px;
+  margin: 1.5rem 0;
+  border-left: 4px solid var(--tp-primary);
+  border: 1px solid var(--tp-border);
+}
+
+.supervisor-bio p {
+  margin: 0;
+  color: var(--tp-text-2);
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+.expertise-section h6 {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  color: var(--tp-text);
+  font-weight: 700;
+}
+
+.expertise-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.expertise-tag {
+  padding: 0.6rem 1.2rem;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--tp-primary);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  transition: all 0.3s ease;
+}
+
+.expertise-tag:hover {
+  background: rgba(37, 99, 235, 0.15);
+  transform: translateY(-2px);
+}
+
+/* =========================================================
+   Team Members Cards
+   ========================================================= */
+.team-members-section {
+  padding: 40px 0;
+}
+
+.team-member-card {
+  background: var(--tp-card);
+  border-radius: 20px;
+  padding: 1.8rem;
+  height: 100%;
+  transition: all 0.3s ease;
+  box-shadow: var(--tp-shadow);
+  border: 1px solid var(--tp-border);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.team-member-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, var(--tp-primary), var(--tp-secondary));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.team-member-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--tp-shadow-hover);
+  border-color: var(--tp-border-2);
+}
+
+.team-member-card:hover::before {
+  transform: scaleX(1);
+}
+
+.member-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid var(--tp-surface);
+}
+
+.member-avatar-wrapper {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  margin-right: 1.5rem;
+  flex-shrink: 0;
+}
+
+.member-avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2.2rem;
+  font-weight: 700;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  border: 4px solid var(--tp-card);
+}
+
+/* Avatar Colors */
+.member-avatar.primary-bg {
+  background: linear-gradient(135deg, var(--tp-primary), #1d4ed8);
+}
+
+.member-avatar.success-bg {
+  background: linear-gradient(135deg, var(--tp-success), #16a34a);
+}
+
+.member-avatar.purple-bg {
+  background: linear-gradient(135deg, var(--tp-purple), #7c3aed);
+}
+
+.member-avatar.warning-bg {
+  background: linear-gradient(135deg, var(--tp-warning), #d97706);
+}
+
+.member-photo {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  border: 4px solid var(--tp-card);
+}
+
+.member-status {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 3px solid var(--tp-card);
+  background: var(--tp-success);
+}
+
+.member-basic-info {
+  flex: 1;
+}
+
+.member-name {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin-bottom: 0.3rem;
+  color: var(--tp-text);
+}
+
+.member-role {
+  color: var(--tp-primary);
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+.member-education {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--tp-muted);
+  font-weight: 600;
+}
+
+.member-education i {
+  margin-right: 0.4rem;
+  color: var(--tp-secondary);
+}
+
+.member-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.member-bio {
+  margin-bottom: 1.5rem;
+}
+
+.member-bio p {
+  color: var(--tp-text-2);
+  line-height: 1.6;
+  margin: 0;
+  font-weight: 500;
+}
+
+.member-skills {
+  margin-bottom: 1.5rem;
+}
+
+.member-skills h6 {
+  font-size: 0.95rem;
+  margin-bottom: 0.75rem;
+  color: var(--tp-text);
+  font-weight: 700;
+}
+
+.skill-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.skill-tag {
+  padding: 0.4rem 0.9rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--tp-surface);
+  color: var(--tp-text-2);
+  border: 1px solid var(--tp-border);
+  transition: all 0.3s ease;
+}
+
+.skill-tag:hover {
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--tp-primary);
+  border-color: rgba(37, 99, 235, 0.3);
+  transform: translateY(-1px);
+}
+
+.member-experience h6 {
+  font-size: 0.95rem;
+  margin-bottom: 0.75rem;
+  color: var(--tp-text);
+  font-weight: 700;
+}
+
+.experience-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.experience-list li {
+  padding: 0.4rem 0;
+  color: var(--tp-text-2);
+  font-size: 0.9rem;
+  position: relative;
+  padding-left: 1.5rem;
+  font-weight: 500;
+}
+
+.experience-list li::before {
+  content: '✓';
+  color: var(--tp-success);
+  position: absolute;
+  left: 0;
+  font-weight: bold;
+}
+
+.member-contact {
+  margin-top: auto;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--tp-surface);
+}
+
+.contact-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--tp-primary), var(--tp-secondary));
+  color: white;
+  padding: 0.8rem 1.8rem;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  width: 100%;
+  border: none;
+}
+
+.contact-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+  background: linear-gradient(135deg, #1d4ed8, #0d9488);
+}
+
+/* =========================================================
+   Project Overview
+   ========================================================= */
+.project-overview-section {
+  padding: 40px 0;
+  background: linear-gradient(135deg, var(--tp-bg), rgba(37, 99, 235, 0.05));
+  border-radius: 22px;
+  margin: 40px 0;
+}
+
+.project-description-card,
+.technology-stack-card {
+  background: var(--tp-card);
+  border-radius: 20px;
+  padding: 2.5rem;
+  height: 100%;
+  box-shadow: var(--tp-shadow);
+  border: 1px solid var(--tp-border);
+}
+
+.project-description-card h4 {
+  color: var(--tp-primary);
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+}
+
+.project-description-card p {
+  color: var(--tp-text-2);
+  line-height: 1.7;
+  margin-bottom: 2rem;
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+.project-highlights h5 {
+  font-size: 1.3rem;
+  margin-bottom: 1.5rem;
+  color: var(--tp-text);
+  font-weight: 700;
+}
+
+.highlight-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.highlight-list li {
+  display: flex;
+  align-items: flex-start;
+  padding: 1rem 0;
+  color: var(--tp-text-2);
+  font-size: 1.05rem;
+  border-bottom: 1px solid var(--tp-border);
+}
+
+.highlight-list li:last-child {
+  border-bottom: none;
+}
+
+.highlight-list li i {
+  margin-top: 0.3rem;
+  flex-shrink: 0;
+  color: var(--tp-success);
+}
+
+.tech-stack-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.tech-item {
+  display: flex;
+  align-items: center;
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: var(--tp-surface);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  border-left: 4px solid var(--tp-primary);
+}
+
+.tech-item:hover {
+  transform: translateX(8px);
+  background: var(--tp-card);
+  border-color: var(--tp-border-2);
+  box-shadow: var(--tp-shadow);
+}
+
+.tech-item i {
+  font-size: 2rem;
+  margin-right: 1.5rem;
+  flex-shrink: 0;
+}
+
+.tech-item.backend i {
+  color: var(--tp-primary);
+}
+
+.tech-item.frontend i {
+  color: var(--tp-success);
+}
+
+.tech-item.ai i {
+  color: var(--tp-purple);
+}
+
+.tech-item.tools i {
+  color: var(--tp-warning);
+}
+
+.tech-item strong {
+  display: block;
+  font-size: 1.1rem;
+  color: var(--tp-text);
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.tech-item p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--tp-muted);
+  font-weight: 600;
+}
+
+.project-stats {
+  margin-top: 2rem;
+}
+
+.project-stats h5 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: var(--tp-text);
+  font-weight: 700;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 1rem;
+  background: var(--tp-surface);
+  border-radius: 12px;
+  border: 1px solid var(--tp-border);
+  transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+  border-color: var(--tp-primary);
+  transform: translateY(-2px);
+}
+
+.stat-number {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--tp-primary);
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--tp-muted);
+  font-weight: 600;
+}
+
+/* =========================================================
+   Timeline Section
+   ========================================================= */
+.timeline-section {
+  padding: 40px 0;
+}
+
+.timeline-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.timeline {
+  position: relative;
+  padding-left: 3rem;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(to bottom, var(--tp-primary), var(--tp-secondary));
+  border-radius: 4px;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 2.5rem;
+  padding-left: 2rem;
+}
+
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -14px;
+  top: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--tp-card);
+  border: 4px solid var(--tp-primary);
+  z-index: 1;
+}
+
+.timeline-date {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.timeline-date .date {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--tp-primary);
+}
+
+.timeline-date .phase {
+  padding: 0.5rem 1.2rem;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--tp-primary);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+.timeline-content {
+  background: var(--tp-card);
+  border: 2px solid var(--tp-border);
+  border-radius: 16px;
+  padding: 1.8rem;
+  box-shadow: var(--tp-shadow);
+  transition: all 0.3s ease;
+}
+
+.timeline-content:hover {
+  border-color: var(--tp-primary);
+  transform: translateX(8px);
+  box-shadow: var(--tp-shadow-hover);
+}
+
+.timeline-content h5 {
+  color: var(--tp-text);
+  font-size: 1.2rem;
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+}
+
+.timeline-content p {
+  color: var(--tp-text-2);
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+/* =========================================================
+   Footer
+   ========================================================= */
+.team-footer {
+  padding: 3rem 0;
+  background: linear-gradient(135deg, #0e6167 0%, #04655eb7 55%, #0e6167 100%);
+  color: white;
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  margin-top: 40px;
+}
+
+[data-bs-theme="dark"] .team-footer {
+  background: linear-gradient(135deg, #17645e 0%, #141f3c 55%, #17645e 100%);
+}
+
+.team-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+}
+
+.team-footer h4 {
+  color: white;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  font-size: 1.8rem;
+  position: relative;
+}
+
+.team-footer .text-white-50 {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.footer-badges .badge {
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  margin: 0.25rem;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  transition: all 0.3s ease;
+  border-radius: 50px;
+}
+
+.footer-badges .badge:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+.footer-divider {
+  height: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 2rem 0;
+}
+
+.team-footer p {
+  margin: 0;
+  font-size: 1.1rem;
+  position: relative;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.team-footer p i {
+  color: #ff6b6b;
+}
+
+/* =========================================================
+   Responsive Design
+   ========================================================= */
+@media (max-width: 992px) {
+  .hero-title {
+    font-size: 2.2rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+  
+  .supervisor-avatar-wrapper,
+  .supervisor-avatar-placeholder,
+  .supervisor-photo {
+    width: 140px;
+    height: 140px;
+  }
+  
+  .supervisor-avatar-placeholder {
+    font-size: 3.5rem;
+  }
+  
+  .member-avatar-wrapper {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .member-avatar,
+  .member-photo {
+    width: 80px;
+    height: 80px;
+    font-size: 2rem;
+  }
+  
+  .team-member-card {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .team-profile-container {
+    padding: 15px;
+  }
+  
+  .team-hero-section {
+    padding: 30px 20px;
+  }
+  
+  .hero-title {
+    font-size: 1.9rem;
+  }
+  
+  .section-title {
+    font-size: 1.6rem;
+  }
+  
+  .member-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .member-avatar-wrapper {
+    margin-right: 0;
+    margin-bottom: 1rem;
+  }
+  
+  .timeline {
+    padding-left: 2rem;
+  }
+  
+  .timeline-item {
+    padding-left: 1.5rem;
+  }
+  
+  .timeline-item::before {
+    left: -10px;
+    width: 24px;
+    height: 24px;
+  }
+  
+  .supervisor-card,
+  .project-description-card,
+  .technology-stack-card {
+    padding: 1.8rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .team-hero-section {
+    padding: 25px 15px;
+    border-radius: 18px;
+  }
+  
+  .hero-title {
+    font-size: 1.7rem;
+  }
+  
+  .hero-badges {
+    justify-content: center;
+  }
+  
+  .team-member-card {
+    padding: 1.2rem;
+  }
+  
+  .timeline::before {
+    left: 16px;
+  }
+  
+  .timeline-item {
+    padding-left: 2.5rem;
+  }
+  
+  .timeline-item::before {
+    left: 8px;
+  }
+  
+  .tech-item {
+    padding: 1.2rem;
+  }
+  
+  .tech-item i {
+    font-size: 1.5rem;
+    margin-right: 1rem;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="team-profile-container">
+    
+    <!-- Hero Section -->
+    <section class="team-hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1 class="hero-title">
+                        <i class="bi bi-people-fill me-3"></i>
+                        DeviceCare Development Team
+                    </h1>
+                    <p class="hero-subtitle">
+                        A team of Biomedical Engineering graduates building innovative solutions for hospital equipment management through modern web technologies.
+                    </p>
+                    <div class="hero-badges">
+                        <span class="badge">Biomedical Engineering</span>
+                        <span class="badge">Class of 2026</span>
+                        <span class="badge">HTI University</span>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-center mt-4 mt-lg-0">
+                    <div class="hero-icon">
+                        <i class="bi bi-cpu-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Supervisor Section -->
+    <section class="supervisor-section">
+        <div class="container">
+            <h2 class="section-title">
+                <i class="bi bi-award-fill me-2"></i>
+                Project Supervisor
+            </h2>
+            <p class="section-subtitle mb-4">Academic guidance and technical oversight</p>
+            
+            <div class="supervisor-card">
+                <div class="row align-items-center">
+                    <div class="col-lg-4 text-center mb-4 mb-lg-0">
+                        <div class="supervisor-avatar-wrapper">
+                            {% if supervisor.photo %}
+                                <img src="{% static supervisor.photo %}" alt="Dr. Lamia Nabil Mahdy" class="supervisor-photo">
+                            {% else %}
+                                <div class="supervisor-avatar-placeholder">
+                                    <i class="bi bi-person-badge"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="mt-3">
+                            <h5 class="mb-0">{{ supervisor.name }}</h5>
+                            <p class="text-muted mb-0">{{ supervisor.title }}</p>
+                            <p class="text-muted small">{{ supervisor.department }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-8">
+                        <div class="supervisor-info">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <i class="bi bi-building me-2"></i>
+                                        <div>
+                                            <strong>Institution</strong>
+                                            <p class="mb-0">{{ supervisor.institution }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="info-item mt-3">
+                                        <i class="bi bi-mortarboard me-2"></i>
+                                        <div>
+                                            <strong>Position</strong>
+                                            <p class="mb-0">{{ supervisor.title }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <i class="bi bi-envelope me-2"></i>
+                                        <div>
+                                            <strong>Email</strong>
+                                            <p class="mb-0">
+                                                <a href="mailto:{{ supervisor.email }}" class="text-decoration-none">
+                                                    {{ supervisor.email }}
+                                                </a>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="info-item mt-3">
+                                        <i class="bi bi-telephone me-2"></i>
+                                        <div>
+                                            <strong>Phone</strong>
+                                            <p class="mb-0">{{ supervisor.phone }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="supervisor-bio">
+                                <p>{{ supervisor.bio }}</p>
+                            </div>
+                            
+                            <div class="expertise-section">
+                                <h6>Areas of Expertise:</h6>
+                                <div class="expertise-tags">
+                                    {% for expertise in supervisor.expertise %}
+                                    <span class="expertise-tag">{{ expertise }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Team Members Section -->
+    <section class="team-members-section">
+        <div class="container">
+            <h2 class="section-title">
+                <i class="bi bi-code-slash me-2"></i>
+                Development Team
+            </h2>
+            <p class="section-subtitle mb-5">
+                Dedicated Biomedical Engineering students combining medical knowledge with technical expertise
+            </p>
+            
+            <div class="row justify-content-center">
+                {% for member in team_members %}
+                <div class="col-xl-4 col-lg-6 mb-4">
+                    <div class="team-member-card">
+                        <div class="member-header">
+                            <div class="member-avatar-wrapper">
+                                {% if member.photo %}
+                                    <img src="{% static member.photo %}" alt="{{ member.name }}" class="member-photo">
+                                {% else %}
+                                    <div class="member-avatar primary-bg">
+                                        <span>{{ member.name|slice:":2"|upper }}</span>
+                                    </div>
+                                {% endif %}
+                                <div class="member-status"></div>
+                            </div>
+                            <div class="member-basic-info">
+                                <h4 class="member-name">{{ member.name }}</h4>
+                                <p class="member-role">{{ member.role }}</p>
+                                <div class="member-education">
+                                    <i class="bi bi-mortarboard me-1"></i>
+                                    <span>Biomedical Engineering Student</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="member-body">
+                            <div class="member-bio">
+                                <p>{{ member.bio }}</p>
+                            </div>
+                            
+                            <div class="member-skills">
+                                <h6>Technical Skills:</h6>
+                                <div class="skill-tags">
+                                    {% for skill in member.skills %}
+                                    <span class="skill-tag">{{ skill }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            {% if member.experience %}
+                            <div class="member-experience">
+                                <h6>Relevant Experience:</h6>
+                                <ul class="experience-list">
+                                    {% for exp in member.experience %}
+                                    <li>{{ exp }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="member-contact mt-auto">
+                                {% if member.email %}
+                                <a href="mailto:{{ member.email }}" class="contact-btn">
+                                    <i class="bi bi-envelope me-2"></i>
+                                    Send Email
+                                </a>
+                                {% elif member.linkedin %}
+                                <a href="{{ member.linkedin }}" target="_blank" class="contact-btn">
+                                    <i class="bi bi-linkedin me-2"></i>
+                                    View LinkedIn
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    
+    <!-- Project Overview -->
+    <section class="project-overview-section">
+        <div class="container">
+            <h2 class="section-title">
+                <i class="bi bi-clipboard-data-fill me-2"></i>
+                Project Overview
+            </h2>
+            
+            <div class="row">
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <div class="project-description-card">
+                        <h4 class="mb-3">{{ project_info.name }}</h4>
+                        <p class="mb-4">{{ project_info.description }}</p>
+                        
+                        <div class="project-highlights">
+                            <h5>Project Highlights:</h5>
+                            <ul class="highlight-list">
+                                <li>
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    <span>Graduation project for Biomedical Engineering Class of 2026</span>
+                                </li>
+                                <li>
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    <span>Combines medical knowledge with modern web technologies</span>
+                                </li>
+                                <li>
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    <span>Real-world solution for healthcare facilities</span>
+                                </li>
+                                <li>
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    <span>Industry-relevant skills development</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="technology-stack-card">
+                        <h5 class="mb-3">Technology Stack</h5>
+                        <div class="tech-stack-grid">
+                            <div class="tech-item backend">
+                                <i class="bi bi-server"></i>
+                                <div>
+                                    <strong>Backend</strong>
+                                    <p class="mb-0">Django, Python, PostgreSQL</p>
+                                </div>
+                            </div>
+                            <div class="tech-item frontend">
+                                <i class="bi bi-layout-text-window"></i>
+                                <div>
+                                    <strong>Frontend</strong>
+                                    <p class="mb-0">HTML, CSS, JavaScript, Bootstrap</p>
+                                </div>
+                            </div>
+                            <div class="tech-item ai">
+                                <i class="bi bi-cpu"></i>
+                                <div>
+                                    <strong>AI/ML</strong>
+                                    <p class="mb-0">Machine Learning, Data Analytics</p>
+                                </div>
+                            </div>
+                            <div class="tech-item tools">
+                                <i class="bi bi-tools"></i>
+                                <div>
+                                    <strong>Tools</strong>
+                                    <p class="mb-0">Git, Docker, REST APIs</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="project-stats mt-4">
+                            <h5 class="mb-3">Project Statistics</h5>
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <div class="stat-number">{{ project_stats.code_lines }}</div>
+                                    <div class="stat-label">Lines of Code</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number">{{ project_stats.api_endpoints }}</div>
+                                    <div class="stat-label">API Endpoints</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number">{{ project_stats.database_tables }}</div>
+                                    <div class="stat-label">Database Tables</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number">{{ project_stats.development_hours }}</div>
+                                    <div class="stat-label">Development Hours</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Timeline Section -->
+    <section class="timeline-section">
+        <div class="container">
+            <h2 class="section-title">
+                <i class="bi bi-calendar-range me-2"></i>
+                Development Timeline
+            </h2>
+            
+            <div class="timeline-wrapper">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-date">
+                            <span class="date">Jan 2025</span>
+                            <span class="phase">Phase 1</span>
+                        </div>
+                        <div class="timeline-content">
+                            <h5>Project Initiation</h5>
+                            <p>Requirements analysis and technology stack selection</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">
+                            <span class="date">Mar 2025</span>
+                            <span class="phase">Phase 2</span>
+                        </div>
+                        <div class="timeline-content">
+                            <h5>Backend Development</h5>
+                            <p>Database design and API development</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">
+                            <span class="date">Jun 2025</span>
+                            <span class="phase">Phase 3</span>
+                        </div>
+                        <div class="timeline-content">
+                            <h5>Frontend Development</h5>
+                            <p>UI/UX design and interface implementation</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">
+                            <span class="date">Sep 2025</span>
+                            <span class="phase">Phase 4</span>
+                        </div>
+                        <div class="timeline-content">
+                            <h5>Integration & Testing</h5>
+                            <p>System integration and comprehensive testing</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">
+                            <span class="date">Dec 2025</span>
+                            <span class="phase">Phase 5</span>
+                        </div>
+                        <div class="timeline-content">
+                            <h5>Deployment & Documentation</h5>
+                            <p>Production deployment and project documentation</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="team-footer">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 text-center text-lg-start mb-3 mb-lg-0">
+                    <h4 class="mb-2">DeviceCare Project</h4>
+                    <p class="text-white-50 mb-0">Biomedical Engineering Graduation Project {{ project_info.year }}</p>
+                </div>
+                <div class="col-lg-6 text-center text-lg-end">
+                    <div class="footer-badges">
+                        <span class="badge">Higher Technological Institute</span>
+                        <span class="badge">Biomedical Engineering Department</span>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-divider my-4"></div>
+            <div class="text-center">
+                <p class="mb-0">
+                    <i class="bi bi-heart-fill text-danger me-1"></i>
+                    Building innovative solutions for better healthcare management
+                </p>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<!-- Optional: Add animation effects -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add subtle animation to cards on load
+    const cards = document.querySelectorAll('.team-member-card, .supervisor-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 100 * index);
+    });
+
+    // Add hover effect to contact buttons
+    const contactButtons = document.querySelectorAll('.contact-btn');
+    contactButtons.forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-3px) scale(1.02)';
+        });
+        button.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+
+    // Add click effect to timeline items
+    const timelineItems = document.querySelectorAll('.timeline-item');
+    timelineItems.forEach(item => {
+        item.addEventListener('click', function() {
+            this.querySelector('.timeline-content').style.transform = 'translateX(5px)';
+            setTimeout(() => {
+                this.querySelector('.timeline-content').style.transform = 'translateX(0)';
+            }, 300);
+        });
+    });
+});
+</script>
+{% endblock %}

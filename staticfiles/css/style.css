@@ -1,0 +1,180 @@
+/* Arabic Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap');
+
+body {
+    font-family: 'Cairo', sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+} 
+
+/* Navigation */
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+/* Cards */
+.card {
+    border-radius: 10px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border-light);
+    background: var(--bg-card);
+    color: var(--text-primary);
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+    font-weight: 600;
+}
+
+.card-shadow {
+    box-shadow: var(--shadow-lg);
+}
+
+/* Tables */
+.table th {
+    font-weight: 600;
+    background-color: var(--bg-secondary);
+    border-top: none;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(var(--app-primary-rgb), 0.05);
+}
+
+/* Badges */
+.badge {
+    font-weight: 500;
+    padding: 0.4em 0.8em;
+}
+
+/* Forms */
+.form-control, .form-select {
+    border-radius: 5px;
+    border: 1px solid var(--border-light);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--app-primary);
+    box-shadow: 0 0 0 0.25rem rgba(var(--app-primary-rgb), 0.25);
+}
+
+/* Buttons */
+.btn {
+    border-radius: 5px;
+    font-weight: 500;
+}
+
+.btn-group .btn {
+    border-radius: 0;
+}
+
+.btn-group .btn:first-child {
+    border-top-right-radius: 5px !important;
+    border-bottom-right-radius: 5px !important;
+}
+
+.btn-group .btn:last-child {
+    border-top-left-radius: 5px !important;
+    border-bottom-left-radius: 5px !important;
+}
+
+/* Icons */
+.icon {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+}
+
+/* QR Code */
+.qr-code {
+    max-width: 200px;
+    margin: 0 auto;
+}
+
+/* Footer */
+footer {
+    margin-top: auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 14px;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+    }
+    
+    .btn-group .btn {
+        border-radius: 5px !important;
+        margin-bottom: 5px;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+}
+
+/* Custom colors */
+.bg-primary {
+    background-color: var(--app-primary) !important;
+}
+
+.bg-success {
+    background-color: var(--app-success) !important;
+}
+
+.bg-warning {
+    background-color: var(--app-warning) !important;
+}
+
+.bg-info {
+    background-color: var(--app-info) !important;
+}
+
+/* Alert */
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+
+/* Modal */
+.modal-content {
+    border-radius: 10px;
+}
+
+/* Login page */
+.login-card {
+    border-radius: 15px;
+    border: none;
+}
+
+.login-header {
+    border-radius: 15px 15px 0 0;
+}
+/* Status Legend */
+.status-legend {
+    border-color: var(--border-medium) !important;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}

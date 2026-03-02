@@ -1,0 +1,811 @@
+<!-- templates/devices/list.html -->
+{% extends 'base.html' %}
+
+{% block title %}Devices Management - DeviceCare System{% endblock %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-12 col-md-8">
+        <h1 class="h2 mb-1 fw-bold">
+            <i class="bi bi-cpu me-2 text-primary"></i>Devices Management
+        </h1>
+        <p class="text-muted mb-0">Manage all medical devices and equipment in the system</p>
+    </div>
+    <div class="col-12 col-md-4 text-md-end mt-2 mt-md-0">
+        <div class="d-flex gap-2 justify-content-end">
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-primary btn-hover-scale">
+                <i class="bi bi-arrow-left me-1"></i> Dashboard
+            </a>
+            <a href="{% url 'device_add' %}" class="btn btn-primary btn-hover-scale">
+                <i class="bi bi-plus-circle me-1"></i> Add Device
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-3 mb-4">
+    <!-- Total Devices -->
+    <div class="col-md-3">
+        <div class="card stat-card border-0 shadow-sm h-100 hover-lift theme-transition">
+            <div class="card-body p-3 text-center">
+                <div class="icon-stat bg-primary text-white rounded-circle mx-auto mb-3">
+                    <i class="bi bi-cpu-fill fs-4"></i>
+                </div>
+                <h3 class="mb-0 fw-bold">{{ devices.count }}</h3>
+                <p class="fw-semibold mb-1">Total Devices</p>
+                <small class="text-muted">All registered equipment</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Devices -->
+    <div class="col-md-3">
+        <div class="card stat-card border-0 shadow-sm h-100 hover-lift theme-transition">
+            <div class="card-body p-3 text-center">
+                <div class="icon-stat bg-success text-white rounded-circle mx-auto mb-3">
+                    <i class="bi bi-check-circle-fill fs-4"></i>
+                </div>
+                <h3 class="mb-0 fw-bold">{{ active_devices }}</h3>
+                <p class="fw-semibold mb-1">Active Devices</p>
+                <small class="text-muted">Operating normally</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Under Maintenance -->
+    <div class="col-md-3">
+        <div class="card stat-card border-0 shadow-sm h-100 hover-lift theme-transition">
+            <div class="card-body p-3 text-center">
+                <div class="icon-stat bg-warning text-white rounded-circle mx-auto mb-3">
+                    <i class="bi bi-tools fs-4"></i>
+                </div>
+                <h3 class="mb-0 fw-bold">{{ maintenance_devices }}</h3>
+                <p class="fw-semibold mb-1">Under Maintenance</p>
+                <small class="text-muted">Need attention</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Codes -->
+    <div class="col-md-3">
+        <div class="card stat-card border-0 shadow-sm h-100 hover-lift theme-transition">
+            <div class="card-body p-3 text-center">
+                <div class="icon-stat bg-info text-white rounded-circle mx-auto mb-3">
+                    <i class="bi bi-qr-code-scan fs-4"></i>
+                </div>
+                <h3 class="mb-0 fw-bold">{{ devices.count }}</h3>
+                <p class="fw-semibold mb-1">QR Codes</p>
+                <small class="text-muted">All devices have QR</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters and Search -->
+<div class="card shadow-sm border-0 mb-4 theme-transition">
+    <div class="card-header bg-surface border-bottom py-3">
+        <h5 class="mb-0 fw-bold">
+            <i class="bi bi-funnel me-2 text-primary"></i>Search & Filter
+        </h5>
+    </div>
+    <div class="card-body p-3">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-surface border-end-0">
+                        <i class="bi bi-search text-muted"></i>
+                    </span>
+                    <input type="text" class="form-control border-start-0" id="search" name="search" 
+                           placeholder="Search by device name or ID..." value="{{ request.GET.search }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="status" name="status">
+                    <option value="">All Statuses</option>
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="department" name="department">
+                    <option value="">All Departments</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept.id }}" {% if request.GET.department == dept.id|stringformat:"s" %}selected{% endif %}>
+                        {{ dept.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary fw-semibold">
+                        <i class="bi bi-funnel me-1"></i> Apply
+                    </button>
+                </div>
+            </div>
+        </form>
+        
+        {% if request.GET.search or request.GET.status or request.GET.department %}
+        <div class="mt-3 pt-3 border-top border-light">
+            <div class="d-flex justify-content-between align-items-center">
+                <small>
+                    <i class="bi bi-filter me-1"></i>
+                    Filters applied:
+                    {% if request.GET.search %}<span class="badge bg-surface border border-light ms-1">{{ request.GET.search }}</span>{% endif %}
+                    {% if request.GET.status %}<span class="badge bg-surface border border-light ms-1">{{ request.GET.status }}</span>{% endif %}
+                    {% if request.GET.department %}<span class="badge bg-surface border border-light ms-1">Dept: {{ request.GET.department }}</span>{% endif %}
+                </small>
+                <a href="{% url 'device_list' %}" class="btn btn-sm btn-outline-danger">
+                    <i class="bi bi-x-circle me-1"></i> Clear
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Devices Table -->
+<div class="card shadow-sm border-0 theme-transition">
+    <div class="card-header bg-surface border-bottom py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold">
+            <i class="bi bi-list-ul me-2 text-primary"></i>Devices List
+            <span class="badge bg-primary text-white ms-2">{{ devices.count }}</span>
+        </h5>
+        <div class="dropdown">
+            <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-gear me-1"></i> Options
+            </button>
+            <ul class="dropdown-menu">
+                    <li>
+                    <a class="dropdown-item"
+                        href="{% url 'devices_export_excel' %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}">
+                        <i class="bi bi-file-earmark-excel me-2 text-success"></i> Export Excel
+                    </a>
+                    </li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{% url 'device_add' %}"><i class="bi bi-plus-circle me-2"></i> Add New</a></li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="card-body p-0">
+        {% if devices %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="bg-surface">
+                    <tr>
+                        <th class="ps-3 fw-semibold" style="width: 80px;">QR Code</th>
+                        <th class="fw-semibold">Device ID</th>
+                        <th class="fw-semibold">Device Name</th>
+                        <th class="fw-semibold">Type</th>
+                        <th class="fw-semibold">Department</th>
+                        <th class="fw-semibold">Status</th>
+                        <th class="text-end pe-3 fw-semibold" style="width: 150px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for device in devices %}
+                    <tr class="clickable-row" data-url="{% url 'device_detail' device.pk %}">
+                        <!-- QR Code -->
+                        <td class="ps-3">
+                            {% if device.qr_code %}
+                            <img src="{{ device.qr_code.url }}" alt="QR Code" 
+                                 class="rounded border border-light qr-image" 
+                                 style="width: 50px; height: 50px; cursor: pointer; background: white; padding: 4px;"
+                                 onclick="event.stopPropagation(); showQRModal('{{ device.qr_code.url|escapejs }}', '{{ device.name|escapejs }}', '{{ device.device_id|escapejs }}', '{{ device.get_status_display|escapejs }}')"
+                                 title="Click to view QR code">
+                            {% else %}
+                            <span class="badge bg-secondary rounded-pill">
+                                <i class="bi bi-qr-code me-1"></i> Generating
+                            </span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Device ID -->
+                        <td>
+                            <span class="fw-bold">{{ device.device_id }}</span>
+                            {% if device.serial_number %}
+                            <br><small class="text-muted">SN: {{ device.serial_number|truncatechars:10 }}</small>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Device Name -->
+                        <td>
+                            <div class="fw-medium">{{ device.name }}</div>
+                            <small class="text-muted">{{ device.model|default:"No model"|truncatechars:20 }}</small>
+                            {% if device.location %}
+                            <br><small class="text-muted"><i class="bi bi-geo-alt me-1"></i>{{ device.location|truncatechars:15 }}</small>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Type -->
+                        <td>
+                            <span class="badge bg-surface border border-light">
+                                {{ device.get_device_type_display }}
+                            </span>
+                        </td>
+                        
+                        <!-- Department -->
+                        <td>
+                            {% if device.department %}
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-building me-2 text-info"></i>
+                                <span>{{ device.department.name|truncatechars:15 }}</span>
+                            </div>
+                            {% else %}
+                            <span class="badge bg-secondary">Not assigned</span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Status -->
+                        <td>
+                            {% if device.status == 'active' %}
+                            <span class="badge bg-success text-white rounded-pill">
+                                <i class="bi bi-check-circle me-1"></i>
+                                {{ device.get_status_display }}
+                            </span>
+                            {% elif device.status == 'maintenance' %}
+                            <span class="badge bg-warning text-white rounded-pill">
+                                <i class="bi bi-tools me-1"></i>
+                                {{ device.get_status_display }}
+                            </span>
+                            {% elif device.status == 'inactive' %}
+                            <span class="badge bg-danger text-white rounded-pill">
+                                <i class="bi bi-x-circle me-1"></i>
+                                {{ device.get_status_display }}
+                            </span>
+                            {% else %}
+                            <span class="badge bg-secondary text-white rounded-pill">
+                                <i class="bi bi-question-circle me-1"></i>
+                                {{ device.get_status_display }}
+                            </span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Actions -->
+                        <td class="text-end pe-3">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'device_detail' device.pk %}" class="btn btn-outline-primary" 
+                                   title="View details" data-bs-toggle="tooltip">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'device_edit' device.pk %}" class="btn btn-outline-secondary"
+                                   title="Edit" data-bs-toggle="tooltip">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button type="button" class="btn btn-outline-danger" 
+                                        onclick="event.stopPropagation(); showDeleteModal('{{ device.pk }}', '{{ device.name|escapejs }}', '{{ device.device_id|escapejs }}', '{{ device.get_device_type_display|escapejs }}')"
+                                        title="Delete" data-bs-toggle="tooltip">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-inbox display-6 text-muted mb-3"></i>
+            <h5 class="fw-bold mb-2">No Devices Found</h5>
+            <p class="text-muted mb-4">Start by adding the first device to the system</p>
+            <a href="{% url 'device_add' %}" class="btn btn-primary fw-semibold">
+                <i class="bi bi-plus-circle me-1"></i> Add First Device
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if devices.has_other_pages %}
+    <div class="card-footer bg-surface border-top py-3">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center mb-0">
+                {% if devices.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ devices.previous_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
+                </li>
+                {% endif %}
+                
+                {% for i in devices.paginator.page_range %}
+                    {% if devices.number == i %}
+                    <li class="page-item active">
+                        <span class="page-link bg-primary border-primary">{{ i }}</span>
+                    </li>
+                    {% elif i > devices.number|add:"-3" and i < devices.number|add:"3" %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ i }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            {{ i }}
+                        </a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if devices.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ devices.next_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow-lg theme-transition">
+            <div class="modal-header bg-surface border-bottom py-3">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-exclamation-triangle me-2 text-danger"></i> Confirm Deletion
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this device?</p>
+                <div class="alert alert-warning border-warning">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="bi bi-cpu fs-4 text-warning"></i>
+                        </div>
+                        <div>
+                            <strong id="deleteDeviceName"></strong><br>
+                            <small class="text-muted">ID: <span id="deleteDeviceId"></span></small><br>
+                            <small class="text-muted">Type: <span id="deleteDeviceType"></span></small>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-danger fw-semibold">
+                    <i class="bi bi-info-circle me-1"></i> This action cannot be undone!
+                </p>
+            </div>
+            <div class="modal-footer bg-surface border-top">
+                <form id="deleteForm" method="post" action="">
+                    {% csrf_token %}
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-danger fw-semibold">
+                        <i class="bi bi-trash me-1"></i> Delete Device
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- QR Code Modal -->
+<div class="modal fade" id="qrModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg theme-transition">
+            <div class="modal-header bg-surface border-bottom py-3">
+                <h5 class="modal-title fw-bold" id="qrModalTitle">Device QR Code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div class="mb-4">
+                    <img id="qrModalImage" src="" alt="QR Code" class="img-fluid border rounded-3 p-2 border-light" 
+                         style="max-width: 250px; background: white;">
+                </div>
+                <div class="text-start mb-4">
+                    <p class="fw-semibold mb-1"><i class="bi bi-info-circle me-2 text-primary"></i>Device Information:</p>
+                    <div id="qrDeviceInfo" class="text-muted small"></div>
+                </div>
+                <div class="d-grid gap-2">
+                    <a id="qrDownloadLink" href="#" download class="btn btn-primary fw-semibold">
+                        <i class="bi bi-download me-1"></i> Download QR Code
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Custom styles for devices list */
+.btn-hover-scale:hover {
+    transform: scale(1.02);
+    transition: transform 0.2s ease;
+}
+
+.icon-stat {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-default);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.icon-stat:hover {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 15px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    overflow: hidden;
+}
+
+.stat-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg) !important;
+    border-color: var(--border-medium);
+}
+
+.stat-card .card-body {
+    position: relative;
+    z-index: 1;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, 
+        var(--app-primary) 0%, 
+        var(--app-secondary) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.stat-card:hover::before {
+    opacity: 1;
+}
+
+.clickable-row {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.clickable-row:hover {
+    background-color: var(--bg-surface) !important;
+    transform: translateX(5px);
+}
+
+.clickable-row::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--app-primary);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.clickable-row:hover::after {
+    opacity: 1;
+}
+
+/* Status badge styles */
+.status-active {
+    background: linear-gradient(135deg, 
+        rgba(var(--success-500-rgb), 0.15), 
+        rgba(var(--success-400-rgb), 0.1));
+    color: var(--app-success);
+    border: 1px solid rgba(var(--success-500-rgb), 0.2);
+}
+
+.status-maintenance {
+    background: linear-gradient(135deg, 
+        rgba(var(--warning-500-rgb), 0.15), 
+        rgba(var(--warning-400-rgb), 0.1));
+    color: var(--app-warning);
+    border: 1px solid rgba(var(--warning-500-rgb), 0.2);
+}
+
+.status-inactive {
+    background: linear-gradient(135deg, 
+        rgba(var(--danger-500-rgb), 0.15), 
+        rgba(var(--danger-400-rgb), 0.1));
+    color: var(--app-danger);
+    border: 1px solid rgba(var(--danger-500-rgb), 0.2);
+}
+
+/* Pagination styles */
+.page-link {
+    background: var(--bg-card);
+    border-color: var(--border-light);
+    color: var(--text-primary);
+    border-radius: 8px;
+    margin: 0 3px;
+    transition: all 0.2s ease;
+}
+
+.page-link:hover {
+    background: var(--bg-surface);
+    border-color: var(--border-medium);
+    transform: translateY(-2px);
+}
+
+.page-item.active .page-link {
+    background: var(--app-primary);
+    border-color: var(--app-primary);
+    box-shadow: 0 4px 8px rgba(var(--app-primary-rgb), 0.3);
+}
+
+/* QR code image styles */
+.qr-image {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    padding: 8px;
+    border-radius: 12px;
+    border: 2px solid var(--border-light);
+    transition: var(--transition-default);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+}
+
+.qr-image:hover {
+    border-color: var(--app-primary);
+    transform: scale(1.08) rotate(2deg);
+    box-shadow: 0 6px 12px rgba(var(--app-primary-rgb), 0.2);
+    cursor: pointer;
+}
+
+/* Table responsive adjustments */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .btn-group-sm {
+        flex-direction: column;
+        gap: 3px;
+    }
+    
+    .btn-group-sm .btn {
+        width: 100%;
+        border-radius: 6px !important;
+    }
+    
+    .icon-stat {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .stat-card {
+        border-radius: 12px;
+    }
+}
+
+/* Card shadow effects */
+.card {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* Button styles */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--app-primary) 0%, var(--app-secondary) 100%);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--app-primary-dark) 0%, var(--app-secondary-dark) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(var(--app-primary-rgb), 0.3);
+}
+
+/* Badge styles */
+.badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+    border-radius: 20px;
+}
+
+/* Form field styles */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid var(--border-light);
+    transition: all 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--app-primary);
+    box-shadow: 0 0 0 3px rgba(var(--app-primary-rgb), 0.1);
+    transform: translateY(-1px);
+}
+
+/* Table styles */
+.table {
+    --bs-table-hover-bg: rgba(var(--app-primary-rgb), 0.03);
+}
+
+.table th {
+    font-weight: 600;
+    border-bottom-width: 2px;
+}
+
+.table td {
+    vertical-align: middle;
+    padding: 1rem 0.75rem;
+}
+
+/* Link effects */
+a {
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: var(--app-primary);
+}
+</style>
+
+<script>
+// Show QR Modal with device info
+function showQRModal(qrUrl, deviceName, deviceId, deviceStatus) {
+    const modalImage = document.getElementById('qrModalImage');
+    const modalTitle = document.getElementById('qrModalTitle');
+    const downloadLink = document.getElementById('qrDownloadLink');
+    const deviceInfo = document.getElementById('qrDeviceInfo');
+    
+    modalImage.src = qrUrl;
+    modalTitle.textContent = 'QR Code - ' + deviceName;
+    downloadLink.href = qrUrl;
+    downloadLink.download = 'qr_' + deviceName.replace(/\s+/g, '_') + '.png';
+    
+    // Set device information
+    deviceInfo.innerHTML = `
+        <div class="mb-1"><strong>Name:</strong> ${deviceName}</div>
+        <div class="mb-1"><strong>ID:</strong> ${deviceId}</div>
+        <div class="mb-1"><strong>Status:</strong> ${deviceStatus}</div>
+        <div><strong>Scan to:</strong> View device details</div>
+    `;
+    
+    const modal = new bootstrap.Modal(document.getElementById('qrModal'));
+    modal.show();
+}
+
+// Show Delete Confirmation Modal
+function showDeleteModal(deviceId, deviceName, deviceCode, deviceType) {
+    const deleteDeviceName = document.getElementById('deleteDeviceName');
+    const deleteDeviceId = document.getElementById('deleteDeviceId');
+    const deleteDeviceType = document.getElementById('deleteDeviceType');
+    const deleteForm = document.getElementById('deleteForm');
+    
+    deleteDeviceName.textContent = deviceName;
+    deleteDeviceId.textContent = deviceCode;
+    deleteDeviceType.textContent = deviceType;
+    deleteForm.action = `/devices/${deviceId}/delete/`;
+    
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
+}
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    // Make table rows clickable
+    const clickableRows = document.querySelectorAll('.clickable-row');
+    clickableRows.forEach(row => {
+        row.addEventListener('click', function(e) {
+            // Check if click was on a button or link inside the row
+            if (!e.target.closest('button') && !e.target.closest('a')) {
+                const url = this.dataset.url;
+                if (url) window.location.href = url;
+            }
+        });
+    });
+    
+    // Initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Add animation to cards
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('animate__animated', 'animate__fadeInUp');
+    });
+    
+    // Add hover effect to buttons
+    const hoverButtons = document.querySelectorAll('.btn-hover-scale');
+    hoverButtons.forEach(btn => {
+        btn.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.05) translateY(-2px)';
+            this.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.15)';
+        });
+        btn.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1) translateY(0)';
+            this.style.boxShadow = '';
+        });
+    });
+    
+    // Icon effects
+    const icons = document.querySelectorAll('.icon-stat');
+    icons.forEach(icon => {
+        icon.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.1) rotate(5deg)';
+        });
+        icon.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1) rotate(0)';
+        });
+    });
+    
+    // Theme transition helper
+    function applyThemeTransition(elements) {
+        elements.forEach(element => {
+            element.classList.add('theme-transition');
+        });
+    }
+    
+    // Apply theme transition to interactive elements
+    const interactiveElements = document.querySelectorAll('.btn, .badge, .card, .modal-content, .form-control, .form-select');
+    applyThemeTransition(interactiveElements);
+    
+    // Filter form submit with loading state
+    const filterForm = document.querySelector('form[method="get"]');
+    if (filterForm) {
+        filterForm.addEventListener('submit', function() {
+            const applyBtn = this.querySelector('button[type="submit"]');
+            if (applyBtn) {
+                applyBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Loading...';
+                applyBtn.disabled = true;
+                applyBtn.classList.add('disabled');
+            }
+        });
+    }
+    
+    // Effects on page load
+    setTimeout(() => {
+        document.body.classList.add('loaded');
+    }, 100);
+    
+    // Real-time update
+    function updateDateTime() {
+        const now = new Date();
+        const options = { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        };
+        const dateTimeStr = now.toLocaleDateString('en-US', options);
+        
+        // If you want to display date somewhere in the page
+        const dateTimeElement = document.getElementById('currentDateTime');
+        if (dateTimeElement) {
+            dateTimeElement.textContent = dateTimeStr;
+        }
+    }
+    
+    // Update date time every minute
+    updateDateTime();
+    setInterval(updateDateTime, 60000);
+});
+</script>
+{% endblock %}

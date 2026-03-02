@@ -1,0 +1,634 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Control Center - DeviceCare System{% endblock %}
+
+{% block extra_css %}
+<style>
+:root{
+  --cc-primary: #2563EB;
+  --cc-secondary: #0EA5A4;
+  --cc-success: #22C55E;
+  --cc-warning: #F59E0B;
+  --cc-danger:  #EF4444;
+
+  --cc-bg: #F6F8FB;
+  --cc-card: #FFFFFF;
+  --cc-surface: #F1F5F9;
+
+  --cc-text: #0F172A;
+  --cc-text-2: #334155;
+  --cc-muted: #64748B;
+
+  --cc-border: rgba(15, 23, 42, 0.10);
+  --cc-border-2: rgba(15, 23, 42, 0.14);
+
+  --cc-shadow: 0 10px 30px rgba(2, 6, 23, 0.08);
+  --cc-shadow-hover: 0 18px 45px rgba(2, 6, 23, 0.14);
+}
+
+[data-bs-theme="dark"]{
+  --cc-bg: #0B1220;
+  --cc-card: #0F172A;
+  --cc-surface: #111C33;
+
+  --cc-text: #E5E7EB;
+  --cc-text-2: #CBD5E1;
+  --cc-muted: #94A3B8;
+
+  --cc-border: rgba(255,255,255,0.10);
+  --cc-border-2: rgba(255,255,255,0.14);
+
+  --cc-shadow: 0 14px 40px rgba(0,0,0,0.35);
+  --cc-shadow-hover: 0 20px 55px rgba(0,0,0,0.45);
+}
+
+/* Layout */
+.control-center-wrapper{
+  padding: 20px;
+  background: linear-gradient(135deg, var(--cc-bg) 0%, rgba(37,99,235,0.04) 100%);
+  min-height: calc(100vh - 200px);
+  border-radius: 22px;
+}
+
+/* Hero */
+.hero-section{
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  padding: 42px;
+  color: #ffffff;
+  border: 1px solid rgba(255,255,255,.12);
+  background:
+    radial-gradient(900px 520px at 18% 18%, rgba(255,255,255,0.08), transparent 62%),
+    linear-gradient(150deg, #bec0c4 0%, #39393ae4 55%, #d5d6da 100%);
+  box-shadow: 0 18px 50px rgba(11,94,215,0.18);
+}
+.hero-section::after{
+  content:'';
+  position:absolute;
+  left:0; right:0; bottom:0;
+  height:6px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.35), rgba(255,255,255,0));
+  opacity:.25;
+}
+
+/* dark hero */
+[data-bs-theme="dark"] .hero-section{
+  border-color: rgba(255,255,255,.10);
+  background:
+    radial-gradient(900px 520px at 18% 18%, rgba(255,255,255,.04), transparent 62%),
+    linear-gradient(150deg, #45464b6c 0%, #898a8c 55%, #45464b6c 100%);
+  box-shadow: 0 18px 50px rgba(2,6,23,0.5);
+}
+
+/* Hero content */
+.welcome-title{
+  font-size: 2.6rem;
+  font-weight: 900;
+  color:#ffffff;
+  margin-bottom: 10px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.18);
+}
+.welcome-description{
+  font-size: 1.15rem;
+  opacity: 0.92;
+  color: rgba(255,255,255,0.85);
+  margin-bottom: 28px;
+}
+.hero-actions{ display:flex; gap:14px; margin-bottom:34px; }
+
+.btn-hero-primary{
+  background: #ffffff;
+  border: none;
+  padding: 14px 30px;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 1.05rem;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.18);
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #137279;
+}
+.btn-hero-primary:hover{ transform: translateY(-4px); box-shadow: 0 16px 36px rgba(0,0,0,0.26); }
+
+.btn-hero-secondary{
+  color: #fff;
+  padding: 13px 26px;
+  border-radius: 14px;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.18);
+  border:1px solid rgba(255,255,255,0.35);
+}
+.btn-hero-secondary:hover{
+  transform: translateY(-3px);
+  border-color: rgba(255,255,255,0.55);
+  background: rgba(255,255,255,0.28);
+}
+
+/* Quick stats */
+.quick-stats{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+}
+.stat-card{
+  border-radius: 18px;
+  padding: 18px 20px;
+  backdrop-filter: blur(12px);
+  transition: .22s ease;
+  position: relative;
+  overflow: hidden;
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.20);
+}
+.stat-card:hover{ transform: translateY(-4px); box-shadow: 0 14px 30px rgba(0,0,0,.14); }
+.stat-card.active{ border-left: 5px solid #22c55e; }
+.stat-card.warning{ border-left: 5px solid #f59e0b; }
+.stat-card.critical{ border-left: 5px solid #ef4444; }
+
+.stat-value{ font-size: 2.2rem; font-weight: 900; margin-bottom: 4px; color: #ffffff; }
+.stat-label{ font-size: 0.95rem; opacity: 0.92; color: #ffffff; font-weight: 700; }
+
+/* Status strip */
+.status-strip{
+  background: var(--cc-card);
+  border-radius: 18px;
+  padding: 22px;
+  margin: 22px 0 30px;
+  box-shadow: var(--cc-shadow);
+  border: 1px solid var(--cc-border);
+}
+.strip-container{ display:flex; flex-wrap: wrap; gap: 14px; margin-bottom: 10px; }
+.status-card{
+  flex:1; min-width: 250px; display:flex; align-items:center; padding: 18px;
+  border-radius: 14px; border: 1px solid var(--cc-border); background: var(--cc-surface);
+  transition: all 0.25s ease;
+}
+.status-card:hover{ transform: translateY(-3px); box-shadow: var(--cc-shadow-hover); border-color: var(--cc-border-2); }
+.status-indicator{ width: 12px; height: 12px; border-radius: 50%; margin-right: 14px; position: relative; background: var(--cc-primary); }
+.status-card.normal .status-indicator{ background: var(--cc-success); }
+.status-card.warning .status-indicator{ background: var(--cc-warning); }
+.status-card.critical .status-indicator{ background: var(--cc-danger); }
+.status-card.critical .status-indicator::after{
+  content:''; position:absolute; inset:-6px; border-radius:50%; border:2px solid rgba(239,68,68,0.35); animation: pulse 1.8s infinite;
+}
+@keyframes pulse{ 0%,100%{ transform: scale(1); opacity:.55; } 50%{ transform: scale(1.25); opacity:.85; } }
+.status-text{ flex-grow:1; font-weight:800; color: var(--cc-text); }
+.status-count{ font-size: 1.7rem; font-weight: 900; color: var(--cc-text); margin-left: 12px; }
+.update-info{ font-size: .85rem; color: var(--cc-muted); display:block; text-align:center; margin-top: 10px; font-weight: 700; }
+
+/* Shortcuts */
+.shortcuts-grid{ margin-bottom: 34px; }
+.section-title{ font-size: 1.6rem; font-weight: 900; margin-bottom: 18px; color: var(--cc-text); display:flex; align-items:center; gap: 10px; }
+.section-title i{ color: var(--cc-primary); }
+.grid-container{ display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+
+.shortcut-card{
+  background: var(--cc-card); padding: 26px; border-radius: 18px; text-align:center;
+  transition: all 0.25s ease; cursor:pointer; position: relative; border: 1px solid var(--cc-border);
+  box-shadow: var(--cc-shadow); display:flex; flex-direction:column; align-items:center; justify-content:center;
+  min-height: 190px; overflow:hidden;
+}
+.shortcut-card::before{ content:''; position:absolute; left:0; top:0; right:0; height:4px; background: linear-gradient(90deg, var(--cc-primary), var(--cc-secondary)); transform: scaleX(0); transform-origin: left; transition: transform .25s ease; }
+.shortcut-card:hover{ transform: translateY(-7px); box-shadow: var(--cc-shadow-hover); border-color: var(--cc-border-2); }
+.shortcut-card:hover::before{ transform: scaleX(1); }
+
+.card-icon{ font-size: 2.6rem; margin-bottom: 14px; width: 72px; height: 72px; display:flex; align-items:center; justify-content:center; border-radius: 18px; color: #ffffff; background: linear-gradient(135deg, var(--cc-primary), var(--cc-secondary)); transition: .25s ease; }
+.shortcut-card:hover .card-icon{ transform: scale(1.06) rotate(3deg); }
+
+.shortcut-card h3{ font-size: 1.25rem; font-weight: 900; margin-bottom: 8px; color: var(--cc-text); }
+.shortcut-card p{ color: var(--cc-muted); font-size: .95rem; line-height: 1.5; margin: 0; font-weight: 600; }
+
+/* Critical zone */
+.critical-zone{ background: linear-gradient(135deg, rgba(254, 226, 226, 0.92), rgba(254, 202, 202, 0.92)); border: 2px solid var(--cc-danger); border-radius: 20px; padding: 26px; margin-bottom: 34px; }
+[data-bs-theme="dark"] .critical-zone{ background: linear-gradient(135deg, rgba(127, 29, 29, 0.25), rgba(153, 27, 27, 0.22)); }
+.critical-header{ display:flex; justify-content: space-between; align-items:center; margin-bottom: 18px; gap: 16px; }
+.critical-header h2{ margin:0; color: #7f1d1d; font-size: 1.45rem; font-weight: 900; display:flex; align-items:center; gap: 10px; }
+[data-bs-theme="dark"] .critical-header h2{ color: #fecaca; }
+.btn-alert{ background: linear-gradient(135deg, var(--cc-danger), #dc2626); color: #fff; border: none; padding: 12px 22px; border-radius: 14px; font-weight: 900; font-size: .98rem; transition: all .25s ease; display:inline-flex; align-items:center; gap: 10px; }
+.btn-alert:hover{ transform: translateY(-3px); box-shadow: 0 12px 28px rgba(239, 68, 68, 0.32); }
+
+.critical-list{ display:flex; flex-direction:column; gap: 12px; }
+.critical-item{ background: rgba(255,255,255,0.92); border-radius: 14px; padding: 16px 18px; display:flex; justify-content: space-between; align-items:center; border-left: 5px solid var(--cc-danger); transition: .2s ease; gap: 12px; }
+[data-bs-theme="dark"] .critical-item{ background: rgba(15, 23, 42, 0.75); border-color: rgba(255,255,255,0.12); }
+.critical-item:hover{ transform: translateX(5px); box-shadow: 0 10px 22px rgba(0,0,0,0.12); }
+.device-name{ font-weight: 900; color: var(--cc-text); font-size: 1.02rem; }
+.issue{ color: #7f1d1d; font-weight: 900; background: rgba(239, 68, 68, 0.10); padding: 6px 12px; border-radius: 999px; font-size: .9rem; }
+.time{ color: var(--cc-muted); font-size: .9rem; font-weight: 800; }
+
+/* Health */
+.health-section{ background: var(--cc-card); border-radius: 22px; padding: 26px; box-shadow: var(--cc-shadow); border: 1px solid var(--cc-border); margin-bottom: 34px; }
+.health-header{ display:flex; align-items:flex-start; justify-content:space-between; gap: 16px; margin-bottom: 16px; }
+.health-title{ margin:0; font-size: 1.55rem; font-weight: 900; color: var(--cc-text); display:flex; align-items:center; }
+.health-title i{ color: var(--cc-primary); }
+.health-subtitle{ margin-top: 6px; color: var(--cc-muted); font-size: .95rem; font-weight: 700; }
+.health-pill{ display:inline-flex; align-items:center; gap: 10px; padding: 10px 14px; border-radius: 999px; border: 1px solid var(--cc-border); background: var(--cc-surface); font-weight: 900; color: var(--cc-text); user-select:none; }
+.health-pill .dot{ width:10px; height:10px; border-radius: 50%; background: var(--cc-primary); box-shadow: 0 0 0 4px rgba(37,99,235, .12); }
+
+.health-grid{ display:grid; grid-template-columns: 1.05fr 1fr; gap: 16px; }
+.health-card{ background: var(--cc-surface); border: 1px solid var(--cc-border); border-radius: 18px; padding: 18px; }
+.health-card--ring{ display:flex; align-items:center; justify-content:center; }
+.health-ring-wrap{ width: 100%; max-width: 460px; }
+.health-ring{ position: relative; width: 260px; height: 260px; margin: 0 auto; }
+.health-ring svg{ width:100%; height:100%; transform: rotate(-90deg); }
+.health-center{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+.health-percent{ font-size: 2.8rem; font-weight: 1000; letter-spacing: -1px; color: var(--cc-text); }
+.health-caption{ margin-top: 4px; font-size: .95rem; color: var(--cc-muted); font-weight: 800; }
+
+.ring-background{ fill:none; stroke: rgba(100,116,139,0.25); stroke-width: 14; }
+.ring-progress{ fill:none; stroke: var(--cc-success); stroke-width: 14; stroke-linecap: round; filter: url(#softGlow); transition: stroke-dashoffset .75s ease, stroke .25s ease; }
+
+.meter-track{ height: 10px; border-radius: 999px; background: rgba(2, 6, 23, 0.06); overflow:hidden; border: 1px solid var(--cc-border); }
+[data-bs-theme="dark"] .meter-track{ background: rgba(255,255,255,0.07); }
+.meter-fill{ height: 100%; width: 0%; border-radius: 999px; background: var(--cc-success); transition: width .6s ease, background .25s ease; }
+.meter-labels{ display:flex; justify-content: space-between; margin-top: 8px; font-size: .85rem; font-weight: 900; }
+.meter-labels .good{ color: var(--cc-success); }
+.meter-labels .warn{ color: var(--cc-warning); }
+.meter-labels .crit{ color: var(--cc-danger); }
+
+/* Stats list */
+.health-stats{ display:flex; flex-direction:column; gap: 12px; }
+.health-stat{ display:flex; gap: 14px; padding: 14px; border-radius: 16px; border: 1px solid var(--cc-border); background: var(--cc-card); transition: .2s ease; }
+.health-stat:hover{ transform: translateY(-3px); box-shadow: var(--cc-shadow-hover); border-color: var(--cc-border-2); }
+.stat-icon{ width: 46px; height: 46px; border-radius: 16px; display:flex; align-items:center; justify-content:center; color:#fff; background: linear-gradient(135deg, var(--cc-primary), var(--cc-secondary)); flex: 0 0 auto; }
+.stat-icon i{ font-size: 1.25rem; }
+.stat-meta .stat-title{ font-size: .95rem; font-weight: 900; color: var(--cc-text-2); }
+.stat-meta .stat-value{ font-size: 1.55rem; font-weight: 1000; color: var(--cc-text); line-height: 1.1; margin-top: 2px; }
+.stat-meta .stat-hint{ margin-top: 4px; font-size: .85rem; color: var(--cc-muted); font-weight: 700; }
+
+/* Recent maintenance */
+.recent-maintenance-section{ background: var(--cc-card); border-radius: 20px; padding: 26px; border: 1px solid var(--cc-border); box-shadow: var(--cc-shadow); }
+.recent-maintenance-section h3{ font-size: 1.35rem; font-weight: 1000; margin-bottom: 18px; color: var(--cc-text); display:flex; align-items:center; gap: 10px; }
+.maintenance-list{ display:flex; flex-direction:column; gap: 12px; }
+.maintenance-item{ display:flex; align-items:center; padding: 16px; background: var(--cc-surface); border-radius: 16px; transition: all .2s ease; border: 1px solid var(--cc-border); }
+.maintenance-item:hover{ transform: translateX(4px); border-color: var(--cc-border-2); box-shadow: var(--cc-shadow-hover); }
+.maintenance-icon{ width: 48px; height: 48px; background: linear-gradient(135deg, var(--cc-primary), var(--cc-secondary)); border-radius: 16px; display:flex; align-items:center; justify-content:center; margin-right: 16px; color: #fff; font-size: 1.3rem; }
+.maintenance-details{ flex-grow:1; }
+.maintenance-device{ font-weight: 1000; color: var(--cc-text); margin-bottom: 4px; }
+.maintenance-info{ color: var(--cc-muted); font-size: .9rem; display:flex; gap: 14px; flex-wrap: wrap; font-weight: 700; }
+.maintenance-info span{ display:flex; align-items:center; gap: 6px; }
+.maintenance-date{ font-weight: 1000; color: var(--cc-primary); font-size: .95rem; }
+
+/* Responsive */
+@media (max-width: 992px){
+  .health-grid{ grid-template-columns: 1fr; }
+  .health-ring{ width: 240px; height: 240px; }
+}
+@media (max-width: 768px){
+  .control-center-wrapper{ padding: 14px; }
+  .hero-section{ padding: 28px 18px; }
+  .welcome-title{ font-size: 2.1rem; }
+  .hero-actions{ flex-direction: column; }
+  .status-card{ min-width: 100%; }
+  .grid-container{ grid-template-columns: 1fr; }
+  .critical-header{ flex-direction: column; text-align:center; }
+  .critical-item{ flex-direction: column; text-align:center; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="control-center-wrapper">
+
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1 class="welcome-title">Welcome to DeviceCare System</h1>
+      <p class="welcome-description">Real-time medical equipment monitoring & control platform</p>
+
+      <div class="hero-actions">
+        <button class="btn-hero-primary" id="enterDashboardBtn">
+          <i class="bi bi-speedometer2"></i> Enter Dashboard
+        </button>
+        <button class="btn-hero-secondary" id="scanQRBtn">
+          <i class="bi bi-qr-code-scan"></i> Scan Device QR
+        </button>
+      </div>
+
+      <div class="quick-stats">
+        <div class="stat-card active">
+          <div class="stat-value" id="active-devices">{{ active_devices }}</div>
+          <div class="stat-label">Active Devices</div>
+        </div>
+        <div class="stat-card warning">
+          <div class="stat-value" id="maintenance-devices">{{ maintenance_devices }}</div>
+          <div class="stat-label">Devices Under Maintenance</div>
+        </div>
+        <div class="stat-card critical">
+          <div class="stat-value" id="critical-alerts">{{ critical_alerts }}</div>
+          <div class="stat-label">Critical Alerts</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="status-strip">
+    <div class="strip-container">
+      <div class="status-card normal">
+        <div class="status-indicator"></div>
+        <span class="status-text">Devices Running Normally</span>
+        <span class="status-count" id="normal-count">{{ active_devices }}</span>
+      </div>
+
+      <div class="status-card warning">
+        <div class="status-indicator"></div>
+        <span class="status-text">Pending Maintenance</span>
+        <span class="status-count" id="warning-count">{{ maintenance_devices }}</span>
+      </div>
+
+      <div class="status-card critical">
+        <div class="status-indicator"></div>
+        <span class="status-text">Critical Failures</span>
+        <span class="status-count" id="critical-count">{{ critical_alerts }}</span>
+      </div>
+    </div>
+
+    <small class="update-info">Auto-updates every 60 seconds</small>
+  </section>
+
+  <section class="shortcuts-grid">
+    <h2 class="section-title"><i class="bi bi-lightning-charge"></i> Quick Actions</h2>
+    <div class="grid-container">
+      <div class="shortcut-card" data-action="add-device">
+        <div class="card-icon"><i class="bi bi-plus-circle-fill"></i></div>
+        <h3>Add New Device</h3>
+        <p>Register new medical equipment</p>
+      </div>
+      <div class="shortcut-card" data-action="maintenance">
+        <div class="card-icon"><i class="bi bi-tools"></i></div>
+        <h3>Maintenance Center</h3>
+        <p>Schedule and track repairs</p>
+      </div>
+      <div class="shortcut-card" data-action="qr-scanner">
+        <div class="card-icon"><i class="bi bi-qr-code-scan"></i></div>
+        <h3>Scan QR Code</h3>
+        <p>Quick device access</p>
+      </div>
+      <div class="shortcut-card" data-action="departments">
+        <div class="card-icon"><i class="bi bi-building"></i></div>
+        <h3>Departments</h3>
+        <p>Department-wise view</p>
+      </div>
+      <div class="shortcut-card" data-action="reports">
+        <div class="card-icon"><i class="bi bi-graph-up"></i></div>
+        <h3>Reports</h3>
+        <p>Generate analytics</p>
+      </div>
+      <div class="shortcut-card" data-action="settings">
+        <div class="card-icon"><i class="bi bi-gear-fill"></i></div>
+        <h3>System Settings</h3>
+        <p>Configure preferences</p>
+      </div>
+    </div>
+  </section>
+
+  {% if has_critical_alerts %}
+  <section class="critical-zone" id="critical-zone">
+    <div class="critical-header">
+      <h2><i class="bi bi-exclamation-triangle-fill"></i> Critical Attention Required</h2>
+      <button class="btn-alert" id="openIncidentBtn">
+        <i class="bi bi-clipboard-data"></i> Open Incident
+      </button>
+    </div>
+
+    <div class="critical-list">
+      {% for device in overdue_maintenance|slice:":3" %}
+      <div class="critical-item">
+        <span class="device-name">{{ device.name }} ({{ device.device_id }})</span>
+        <span class="issue">Overdue: {{ device.days_overdue }} days</span>
+        <span class="time">Due: {{ device.next_maintenance|date:"M d, Y" }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="health-section">
+    <div class="health-header">
+      <div>
+        <h2 class="health-title">
+          <i class="bi bi-heart-pulse-fill me-2"></i> System Health
+        </h2>
+        <div class="health-subtitle">Live health score based on device operational status</div>
+      </div>
+
+      <div class="health-pill" id="healthPill">
+        <span class="dot" id="healthDot"></span>
+        <span class="label" id="healthLabel">Loading…</span>
+      </div>
+    </div>
+
+    <div class="health-grid">
+      <div class="health-card health-card--ring">
+        <div class="health-ring-wrap">
+          <div class="health-ring">
+            <svg viewBox="0 0 240 240" aria-label="System health ring">
+              <defs>
+                <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="4" result="blur"/>
+                  <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+              </defs>
+
+              <circle class="ring-background" cx="120" cy="120" r="96"></circle>
+              <circle class="ring-progress" cx="120" cy="120" r="96" data-percentage="{{ system_health }}"></circle>
+            </svg>
+
+            <div class="health-center">
+              <div class="health-percent" id="healthPercentText">{{ system_health|floatformat:0 }}%</div>
+              <div class="health-caption">Overall Score</div>
+            </div>
+          </div>
+
+          <div class="health-scale">
+            <span>0</span><span>50</span><span>100</span>
+          </div>
+
+          <div class="health-meter">
+            <div class="meter-track">
+              <div class="meter-fill" id="healthMeterFill"></div>
+            </div>
+            <div class="meter-labels">
+              <span class="good">Good</span>
+              <span class="warn">Warning</span>
+              <span class="crit">Critical</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="health-card health-card--stats">
+        <div class="health-stats">
+          <div class="health-stat">
+            <div class="stat-icon"><i class="bi bi-clock-history"></i></div>
+            <div class="stat-meta">
+              <div class="stat-title">Mean Downtime</div>
+              <div class="stat-value">{{ mean_downtime }}</div>
+              <div class="stat-hint">Average device unavailability</div>
+            </div>
+          </div>
+
+          <div class="health-stat">
+            <div class="stat-icon"><i class="bi bi-wrench-adjustable-circle"></i></div>
+            <div class="stat-meta">
+              <div class="stat-title">Avg. Repair Time</div>
+              <div class="stat-value">{{ avg_repair_time }}</div>
+              <div class="stat-hint">Mean time to restore service</div>
+            </div>
+          </div>
+
+          <div class="health-stat">
+            <div class="stat-icon"><i class="bi bi-cpu-fill"></i></div>
+            <div class="stat-meta">
+              <div class="stat-title">Total Devices</div>
+              <div class="stat-value">{{ total_devices }}</div>
+              <div class="stat-hint">Registered equipment</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="recent-maintenance-section">
+    <h3><i class="bi bi-clock-history"></i> Recent Maintenance Activity</h3>
+
+    <div class="maintenance-list">
+      {% for maintenance in recent_maintenance %}
+      <div class="maintenance-item">
+        <div class="maintenance-icon"><i class="bi bi-tools"></i></div>
+        <div class="maintenance-details">
+          <div class="maintenance-device">{{ maintenance.device.name }}</div>
+          <div class="maintenance-info">
+            <span><i class="bi bi-person"></i> {{ maintenance.technician|default:"Technician" }}</span>
+            <span><i class="bi bi-tag"></i> {{ maintenance.get_maintenance_type_display }}</span>
+            <span><i class="bi bi-cash"></i> {{ currency_symbol|default:"EGP" }} {{ maintenance.cost }}</span>
+          </div>
+        </div>
+        <div class="maintenance-date">{{ maintenance.date|date:"M d, Y" }}</div>
+      </div>
+      {% empty %}
+      <div class="text-center py-4">
+        <i class="bi bi-calendar-check display-6 text-muted"></i>
+        <p class="mt-3 text-muted">No recent maintenance records</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
+<script id="cc-config" type="application/json">
+{
+  "hasDevices": {{ total_devices|default:0|add:"0" }},
+  "systemHealth": {{ system_health|default:0|add:"0" }},
+  "urls": {
+    "dashboard": "{% url 'dashboard' %}",
+    "deviceAdd": "{% url 'device_add' %}",
+    "deviceList": "{% url 'device_list' %}",
+    "departments": "{% url 'departments_list' %}",
+    "admin": "{% url 'admin:index' %}",
+    "reports": "{% url 'reports' %}",
+    "statsApi": "{% url 'control_center_stats_api' %}"
+  }
+}
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function readConfig(){ const el=document.getElementById('cc-config'); if(!el) return null; try{return JSON.parse(el.textContent);}catch(e){console.error('Invalid cc-config JSON:',e);return null;} }
+const CC = readConfig() || { hasDevices:0, systemHealth:0, urls:{} };
+const HAS_DEVICES = Number(CC.hasDevices||0) > 0;
+const URLS = CC.urls||{};
+
+function enterDashboard(){ window.location.href = URLS.dashboard || '/'; }
+function openAddDevice(){ window.location.href = URLS.deviceAdd || '/'; }
+function openMaintenance(){ window.location.href = (URLS.deviceList||'/') + '?status=maintenance'; }
+function openDepartments(){ window.location.href = URLS.departments || '/'; }
+function openSettings(){ window.location.href = URLS.admin || '/admin/'; }
+function openReports(){ window.location.href = URLS.reports || '/'; }
+function openQRScanner(){ if(HAS_DEVICES) window.location.href = URLS.deviceList || '/'; else alert('Please add a device first to use QR scanning'); }
+function openIncidentManager(){ openMaintenance(); }
+
+function getHealthState(p){
+  if(p>=85) return {label:'Good', colorVar:'--cc-success'};
+  if(p>=60) return {label:'Warning', colorVar:'--cc-warning'};
+  return {label:'Critical', colorVar:'--cc-danger'};
+}
+function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+function updateHealthUI(percentage){
+  const pill=document.getElementById('healthPill'), dot=document.getElementById('healthDot'), label=document.getElementById('healthLabel'), meter=document.getElementById('healthMeterFill'), percentText=document.getElementById('healthPercentText');
+  const state=getHealthState(percentage); const color=cssVar(state.colorVar);
+  if(label) label.textContent = state.label;
+  if(dot){ dot.style.background = color; dot.style.boxShadow = `0 0 0 4px ${state.label==='Good'?'rgba(34,197,94,.14)':state.label==='Warning'?'rgba(245,158,11,.16)':'rgba(239,68,68,.16)'}`; }
+  if(pill) pill.style.borderColor = 'var(--cc-border)';
+  if(meter){ meter.style.width = `${percentage}%`; meter.style.background = color; }
+  if(percentText) percentText.textContent = `${Math.round(percentage)}%`;
+  const progressCircle = document.querySelector('.ring-progress'); if(progressCircle) progressCircle.style.stroke = color;
+}
+
+function updateHealthRing(){
+  const progressCircle = document.querySelector('.ring-progress'); if(!progressCircle) return;
+  const percentage = Math.max(0, Math.min(100, Number(progressCircle.dataset.percentage || CC.systemHealth || 0)));
+  const r = 96; const circumference = 2 * Math.PI * r; const offset = circumference - (percentage/100)*circumference;
+  progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+  progressCircle.style.strokeDashoffset = `${offset}`;
+  updateHealthUI(percentage);
+}
+
+let updateInterval = null;
+function updateStatusIndicator(){
+  const updateInfo = document.querySelector('.update-info'); if(!updateInfo) return;
+  updateInfo.textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+  updateInfo.style.color = 'var(--cc-success)';
+  setTimeout(()=>{ updateInfo.style.color=''; },1400);
+}
+function startAutoUpdate(){ if(updateInterval) clearInterval(updateInterval); updateInterval = setInterval(updateStatusIndicator,60000); }
+
+async function fetchStats(){
+  if(!URLS.statsApi) return;
+  try{
+    const res = await fetch(URLS.statsApi, { headers: { 'X-Requested-With': 'XMLHttpRequest' }});
+    if(!res.ok) return;
+    const data = await res.json();
+    const counts = data.counts || {};
+    const active = Number(counts.active_devices||0); const maint = Number(counts.maintenance_devices||0); const critical = Number(counts.critical_alerts||0); const health = Math.max(0, Math.min(100, Number(data.system_health||0)));
+    const elActive=document.getElementById('active-devices'), elMaint=document.getElementById('maintenance-devices'), elCrit=document.getElementById('critical-alerts'), elNormal=document.getElementById('normal-count'), elWarn=document.getElementById('warning-count'), elCritical=document.getElementById('critical-count');
+    if(elActive) elActive.textContent = active; if(elMaint) elMaint.textContent = maint; if(elCrit) elCrit.textContent = critical;
+    if(elNormal) elNormal.textContent = active; if(elWarn) elWarn.textContent = maint; if(elCritical) elCritical.textContent = critical;
+    const progressCircle = document.querySelector('.ring-progress'); if(progressCircle) progressCircle.dataset.percentage = String(health);
+    updateHealthRing(); updateStatusIndicator();
+  }catch(e){ console.warn('Stats fetch failed:', e); }
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  const heroPrimaryBtn = document.getElementById('enterDashboardBtn'); if(heroPrimaryBtn) heroPrimaryBtn.addEventListener('click', enterDashboard);
+  const heroSecondaryBtn = document.getElementById('scanQRBtn'); if(heroSecondaryBtn) heroSecondaryBtn.addEventListener('click', openQRScanner);
+  document.querySelectorAll('.shortcut-card').forEach(card=>card.addEventListener('click', function(){ handleShortcutAction(this.getAttribute('data-action')); }));
+  const incidentBtn = document.getElementById('openIncidentBtn'); if(incidentBtn) incidentBtn.addEventListener('click', openIncidentManager);
+
+  function handleShortcutAction(action){ switch(action){ case 'add-device': openAddDevice(); break; case 'maintenance': openMaintenance(); break; case 'qr-scanner': openQRScanner(); break; case 'departments': openDepartments(); break; case 'reports': openReports(); break; case 'settings': openSettings(); break; default: console.log('Unknown action:', action); } }
+
+  updateHealthRing();
+  startAutoUpdate();
+  // fetchStats(); // optional live updates
+  const wrapper = document.querySelector('.control-center-wrapper'); if(wrapper){ wrapper.style.opacity='0'; wrapper.style.transform='translateY(16px)'; setTimeout(()=>{ wrapper.style.transition='opacity .35s ease, transform .35s ease'; wrapper.style.opacity='1'; wrapper.style.transform='translateY(0)'; },60); }
+});
+
+window.enterDashboard = enterDashboard;
+window.openAddDevice = openAddDevice;
+window.openQRScanner = openQRScanner;
+window.openMaintenance = openMaintenance;
+window.openDepartments = openDepartments;
+window.openReports = openReports;
+</script>
+{% endblock %}
