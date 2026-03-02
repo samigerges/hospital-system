@@ -27,643 +27,147 @@
     {% block extra_css %}{% endblock %}
     
 <style>
-    /* ========== نظام الألوان للوضع الفاتح ========== */
     :root {
-        /* الألوان الأساسية */
-        --primary-50: #eff6ff;
-        --primary-100: #dbeafe;
-        --primary-200: #bfdbfe;
-        --primary-300: #93c5fd;
-        --primary-400: #60a5fa;
-        --primary-500: #0f4c81;
-        --primary-600: #0b3e6a;
-        --primary-700: #1d4ed8;
-        --primary-800: #1e40af;
-        --primary-900: #1e3a8a;
-        --primary-950: #172554;
-        
-        /* الألوان الثانوية */
-        --secondary-50: #faf5ff;
-        --secondary-100: #f3e8ff;
-        --secondary-200: #e9d5ff;
-        --secondary-300: #d8b4fe;
-        --secondary-400: #c084fc;
-        --secondary-500: #14b8a6;
-        --secondary-600: #0f9f91;
-        --secondary-700: #7e22ce;
-        --secondary-800: #6b21a8;
-        --secondary-900: #581c87;
-        --secondary-950: #3b0764;
-        
-        /* الألوان المحايدة */
-        --neutral-50: #f8fafc;
-        --neutral-100: #f1f5f9;
-        --neutral-200: #e2e8f0;
-        --neutral-300: #cbd5e1;
-        --neutral-400: #94a3b8;
-        --neutral-500: #64748b;
-        --neutral-600: #475569;
-        --neutral-700: #334155;
-        --neutral-800: #1e293b;
-        --neutral-900: #0f172a;
-        --neutral-950: #020617;
-        
-        /* ألوان Navbar الجديدة */
-        --navbar-gradient-start: #0b3e6a;     /* hospital navy */
-        --navbar-gradient-end: #0f4c81;       /* clinical blue */
-        --navbar-text-light: #ffffff;         /* أبيض للنصوص */
-        --navbar-text-secondary: #dbeafe;     /* أزرق فاتح جداً */
-        --navbar-hover-bg: rgba(255, 255, 255, 0.2);
-        --navbar-active-bg: rgba(255, 255, 255, 0.3);
-        
-        /* الألوان الوظيفية */
-        --success-50: #f0fdf4;
-        --success-100: #dcfce7;
-        --success-200: #bbf7d0;
-        --success-300: #86efac;
-        --success-400: #4ade80;
-        --success-500: #22c55e;
-        --success-600: #16a34a;
-        --success-700: #15803d;
-        --success-800: #166534;
-        --success-900: #14532d;
-        
-        --warning-50: #fffbeb;
-        --warning-100: #fef3c7;
-        --warning-200: #fde68a;
-        --warning-300: #fcd34d;
-        --warning-400: #fbbf24;
-        --warning-500: #f59e0b;
-        --warning-600: #d97706;
-        --warning-700: #b45309;
-        --warning-800: #92400e;
-        --warning-900: #78350f;
-        
-        --danger-50: #fef2f2;
-        --danger-100: #fee2e2;
-        --danger-200: #fecaca;
-        --danger-300: #fca5a5;
-        --danger-400: #f87171;
-        --danger-500: #ef4444;
-        --danger-600: #dc2626;
-        --danger-700: #b91c1c;
-        --danger-800: #991b1b;
-        --danger-900: #7f1d1d;
-        
-        --info-50: #ecfeff;
-        --info-100: #cffafe;
-        --info-200: #a5f3fc;
-        --info-300: #67e8f9;
-        --info-400: #22d3ee;
-        --info-500: #06b6d4;
-        --info-600: #0891b2;
-        --info-700: #0e7490;
-        --info-800: #155e75;
-        --info-900: #164e63;
-        
-        /* الألوان المخصصة */
-        --accent-500: #06b6d4;
-        --accent-600: #0891b2;
-        
-        /* متغيرات التطبيق - الوضع الفاتح */
-        --bg-primary: var(--neutral-50);
-        --bg-secondary: white;
-        --bg-card: white;
-        --bg-surface: white;
-        --bg-overlay: rgba(0, 0, 0, 0.05);
-        
-        /* تعريف ألوان Control Center (قابلة لإعادة الاستخدام في كامل التطبيق) */
-        --cc-primary: #0F4C81;       /* hospital blue */
-        --cc-primary-rgb: 15, 76, 129;
-        --cc-secondary: #14B8A6;     /* clinical teal */
-        --cc-secondary-rgb: 20, 184, 166;
-        --cc-success: #22C55E;
-        --cc-success-rgb: 34, 197, 94;
-        --cc-warning: #F59E0B;
-        --cc-warning-rgb: 245, 158, 11;
-        --cc-danger:  #EF4444;
-        --cc-danger-rgb: 239, 68, 68;
-
-        --cc-bg: #F4F8FC;
-        --cc-card: #FFFFFF;
-        --cc-surface: #F1F5F9;
-        --cc-text: #0F172A;
-        --cc-text-2: #334155;
-        --cc-muted: #64748B;
-        --cc-border: rgba(15, 23, 42, 0.10);
-        --cc-border-2: rgba(15, 23, 42, 0.14);
-
-        /* النصوص في الوضع الفاتح */
-        --text-primary: var(--neutral-900);
-        --text-secondary: var(--neutral-700);
-        --text-muted: var(--neutral-500);
-        --text-on-primary: white;
-        --text-on-dark: white;
-        
-        --border-light: var(--neutral-200);
-        --border-medium: var(--neutral-300);
-        --border-bold: var(--neutral-400);
-        
-        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-        --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-        --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
-        
-        --transition-default: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        
-        /* ألوان التطبيق - مخرطة على Control Center */
-        --app-primary: var(--cc-primary);
-        --app-primary-rgb: var(--cc-primary-rgb);
-        --app-secondary: var(--cc-secondary);
-        --app-secondary-rgb: var(--cc-secondary-rgb);
-        --app-accent: var(--cc-secondary);
-        --app-accent-rgb: var(--cc-secondary-rgb);
-        --app-success: var(--cc-success);
-        --app-success-rgb: var(--cc-success-rgb);
-        --app-warning: var(--cc-warning);
-        --app-warning-rgb: var(--cc-warning-rgb);
-        --app-danger: var(--cc-danger);
-        --app-danger-rgb: var(--cc-danger-rgb);
-        --app-info: var(--accent-500);
-        --app-info-rgb: 6, 182, 212; /* stays as accent */
-    }
-
-    /* ========== نظام الألوان للوضع الداكن ========== */
-    [data-bs-theme="dark"] {
-        /* متغيرات التطبيق - الوضع الداكن */
-        --bg-primary: var(--neutral-950);
-        --bg-secondary: var(--neutral-900);
-        --bg-card: var(--neutral-800);
-        --bg-surface: var(--neutral-700);
-        --bg-overlay: rgba(255, 255, 255, 0.05);
-        
-        /* Dark variants of Control Center */
-        --cc-bg: #0B1220;
-        --cc-card: #0F172A;
-        --cc-surface: #3a3a3c;
-        --cc-text: #E5E7EB;
-        --cc-text-2: #CBD5E1;
-        --cc-muted: #94A3B8;
-        --cc-border: rgba(255,255,255,0.10);
-        --cc-border-2: rgba(255,255,255,0.14);
-        --cc-shadow: 0 14px 40px rgba(0,0,0,0.35);
-        --cc-shadow-hover: 0 20px 55px rgba(0,0,0,0.45);
-
-        /* ألوان Navbar للوضع الداكن */
-        --navbar-gradient-start: #0a1a2e;
-        --navbar-gradient-end: #0b3e6a;
-        --navbar-text-light: #ffffff;
-        --navbar-text-secondary: #cbd5e1;
-        --navbar-hover-bg: rgba(255, 255, 255, 0.1);
-        --navbar-active-bg: rgba(255, 255, 255, 0.15);
-        
-        /* النصوص في الوضع الداكن */
-        --text-primary: #ffffff;
-        --text-secondary: #e5e7eb;
-        --text-muted: #9ca3af;
-        --text-on-primary: white;
-        --text-on-dark: white;
-        
-        --border-light: var(--neutral-700);
-        --border-medium: var(--neutral-600);
-        --border-bold: var(--neutral-500);
-        
-        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
-        --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
-        --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.3);
-        
-        /* Map app colors to Control Center dark palette */
-        --app-primary: #2563EB; /* keep primary visible in dark */
-        --app-primary-rgb: 37, 99, 235;
-        --app-secondary: #0EA5A4;
-        --app-secondary-rgb: 14, 165, 164;
-        --app-accent: #0EA5A4;
-        --app-accent-rgb: 14, 165, 164;
-        --app-success: #22C55E;
-        --app-success-rgb: 34, 197, 94;
-        --app-warning: #F59E0B;
+        --app-primary: #7c3aed;
+        --app-primary-rgb: 124, 58, 237;
+        --app-secondary: #06b6d4;
+        --app-secondary-rgb: 6, 182, 212;
+        --app-success: #10b981;
+        --app-success-rgb: 16, 185, 129;
+        --app-warning: #f59e0b;
         --app-warning-rgb: 245, 158, 11;
-        --app-danger: #EF4444;
+        --app-danger: #ef4444;
         --app-danger-rgb: 239, 68, 68;
-        --app-info: var(--accent-400);
-        --app-info-rgb: 6, 182, 212;
+        --app-info: #3b82f6;
+        --app-info-rgb: 59, 130, 246;
+
+        --bg-primary: #f5f3ff;
+        --bg-surface: #ffffff;
+        --bg-muted: #ede9fe;
+        --text-primary: #1f1147;
+        --text-secondary: #4c3d78;
+        --border-color: #ddd6fe;
+        --shadow-soft: 0 20px 40px rgba(76, 29, 149, 0.12);
     }
 
-    /* ========== تطبيق الألوان على العناصر ========== */
+    [data-bs-theme="dark"] {
+        --bg-primary: #09090f;
+        --bg-surface: #131320;
+        --bg-muted: #1b1b2b;
+        --text-primary: #f8f7ff;
+        --text-secondary: #bdb6db;
+        --border-color: #2c2c44;
+        --shadow-soft: 0 20px 40px rgba(0, 0, 0, 0.45);
+    }
+
     body {
-        font-family: 'Poppins', 'Roboto', sans-serif;
-        background: var(--bg-primary);
+        font-family: 'Poppins', sans-serif;
+        background:
+            radial-gradient(circle at 10% 20%, rgba(var(--app-secondary-rgb), 0.18), transparent 25%),
+            radial-gradient(circle at 90% 10%, rgba(var(--app-primary-rgb), 0.22), transparent 30%),
+            var(--bg-primary);
         color: var(--text-primary);
-        min-height: 100vh;
-        transition: var(--transition-slow);
+        transition: all 0.35s ease;
     }
 
-    /* ========== Navbar Enhancements ========== */
     .navbar {
-        background: linear-gradient(135deg, var(--navbar-gradient-start), var(--navbar-gradient-end)) !important;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 0.5rem 0;
+        background: rgba(18, 18, 38, 0.88) !important;
+        backdrop-filter: blur(14px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
     }
 
-    .navbar-brand {
-        color: var(--navbar-text-light) !important;
-        font-weight: 700;
-        transition: all 0.3s ease;
-        padding: 0; /* remove frame padding */
-        border-radius: 0;
-        background: transparent;
-        backdrop-filter: none;
-        border: none;
-        margin-left: 12px; /* <-- ابعد اللوجو شوية عن الطرف */
-    }
-
-    /* hover - keep simple, no framed effect */
-    .navbar-brand:hover {
-        background: transparent;
-        transform: none;
-        box-shadow: none;
+    .navbar .nav-link,
+    .navbar .navbar-brand,
+    .navbar .user-name,
+    .navbar .user-role,
+    .navbar .brand-subtitle,
+    .navbar .brand-text {
+        color: #f8f7ff !important;
     }
 
     .nav-link {
-        color: var(--navbar-text-light) !important;
-        font-weight: 500;
-        padding: 0.75rem 1.25rem !important;
-        margin: 0 0.25rem;
-        border-radius: 10px;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
+        border-radius: 999px;
+        transition: all 0.25s ease;
     }
 
-    .nav-link::before {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        width: 0;
-        height: 2px;
-        background: var(--navbar-text-light);
-        transition: all 0.3s ease;
-        transform: translateX(-50%);
-    }
-
-    .nav-link:hover {
-        background: var(--navbar-hover-bg);
-        transform: translateY(-2px);
-        color: var(--navbar-text-light) !important;
-    }
-
-    .nav-link:hover::before {
-        width: 80%;
-    }
-
+    .nav-link:hover,
     .nav-link.active {
-        background: var(--navbar-active-bg) !important;
-        color: var(--navbar-text-light) !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        background: linear-gradient(135deg, rgba(var(--app-primary-rgb), 0.95), rgba(var(--app-secondary-rgb), 0.9));
+        transform: translateY(-1px);
     }
 
-    .nav-link.active::before {
-        width: 80%;
-    }
-
-    .nav-text {
-        font-size: 0.95rem;
-        letter-spacing: 0.3px;
-    }
-
-/* تمييز كلمة "Device Management" في الشعار */
-.brand-subtitle {
-    color: var(--navbar-text-light) !important; /* نفس لون DeviceCare */
-    font-size: 0.8rem;
-    opacity: 0.9;
-    font-weight: 400;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-}
-
-/* تحسين الشعار ككل */
-.navbar-brand .d-flex {
-    gap: 0.2rem;
-}
-
-/* جعل الشعار متناسقاً أكثر */
-.brand-text {
-    font-size: 1.4rem;
-    line-height: 1.2;
-    font-weight: 700;
-    color: var(--navbar-text-light) !important;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-/* تأثير hover للشعار ككل */
-.navbar-brand:hover .brand-text,
-.navbar-brand:hover .brand-subtitle {
-    opacity: 1;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-    /* ========== Enhanced Theme Switcher - Fixed ========== */
-    .theme-switch-wrapper {
-        position: relative;
-        display: inline-block;
-        margin-right: 1.5rem;
-    }
-
-    .theme-switch {
-        display: none;
-    }
-
-    .theme-switch-label {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        cursor: pointer;
-        width: 60px;
-        height: 30px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 15px;
-        position: relative;
-        padding: 0 10px;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        transition: all 0.4s ease;
-        box-shadow: 
-            inset 0 1px 3px rgba(0, 0, 0, 0.2),
-            0 1px 2px rgba(255, 255, 255, 0.1);
-    }
-
-    .theme-switch-label:hover {
-        background: rgba(255, 255, 255, 0.15);
-        border-color: rgba(255, 255, 255, 0.4);
-    }
-
-    /* Sun Icon */
-    .theme-switch-label .bi-sun-fill {
-        font-size: 0.9rem;
-        color: #FFD700;
-        z-index: 1;
-        transition: all 0.3s ease;
-    }
-
-    .theme-switch:checked + .theme-switch-label .bi-sun-fill {
-        color: rgba(255, 215, 0, 0.6);
-    }
-
-    /* Moon Icon */
-    .theme-switch-label .bi-moon-fill {
-        font-size: 0.85rem;
-        color: #E0E0FF;
-        z-index: 1;
-        transition: all 0.3s ease;
-    }
-
-    .theme-switch:checked + .theme-switch-label .bi-moon-fill {
-        color: #E0E0FF;
-    }
-
-    /* Switch Ball - FIXED POSITION */
-    .theme-switch-ball {
-        position: absolute;
-        top: 2px;
-        left: 2px;
-        width: 26px;
-        height: 26px;
-        background: linear-gradient(145deg, #ffffff, #f0f0f0);
-        border-radius: 50%;
-        transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        box-shadow: 
-            0 2px 4px rgba(0, 0, 0, 0.2),
-            0 0 0 1px rgba(255, 255, 255, 0.5);
-        z-index: 2;
-    }
-
-    .theme-switch:checked + .theme-switch-label .theme-switch-ball {
-        transform: translateX(30px);
-        background: linear-gradient(145deg, var(--app-primary), rgba(var(--app-primary-rgb), 0.85));
-        box-shadow: 
-            0 2px 4px rgba(0, 0, 0, 0.25),
-            0 0 0 1px rgba(255, 255, 255, 0.2),
-            inset 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Active state */
-    .theme-switch:checked + .theme-switch-label {
-        background: rgba(0, 0, 0, 0.2);
-    }
-
-    /* Dark mode adjustments */
-    [data-bs-theme="dark"] .theme-switch-label {
-        background: rgba(0, 0, 0, 0.2);
-        border-color: rgba(255, 255, 255, 0.2);
-    }
-
-    [data-bs-theme="dark"] .theme-switch-label:hover {
-        background: rgba(0, 0, 0, 0.25);
-        border-color: rgba(255, 255, 255, 0.3);
-    }
-
-    /* User Avatar */
-    .user-avatar {
-        width: 40px;
-        height: 40px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        color: white;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .user-avatar:hover {
-        transform: scale(1.1);
-        border-color: rgba(255, 255, 255, 0.5);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-    }
-
-    .user-info {
-        margin-left: 0.75rem;
-    }
-
-    .user-name {
-        font-weight: 600;
-        color: var(--navbar-text-light);
-        font-size: 0.95rem;
-    }
-
-    .user-role {
-        font-size: 0.75rem;
-        color: var(--navbar-text-secondary);
-        opacity: 0.9;
-    }
-
-    /* Dropdown Menu */
-    .dropdown-menu {
-        background: linear-gradient(180deg, var(--bg-card), rgba(0,0,0,0.03));
-        color: var(--text-primary);
-        border: 1px solid var(--border-medium);
-        box-shadow: 0 8px 24px rgba(2,6,23,0.08);
-        border-radius: 12px;
-        min-width: 220px;
-        padding: 0.4rem;
-    }
-
-    .dropdown-header {
-        color: var(--text-primary);
-        font-weight: 700;
-        padding: 0.6rem 0.9rem;
-    }
-
-    .dropdown-item,
-    .dropdown-menu .nav-link {
-        color: var(--text-primary) !important;
-        background: transparent;
-        padding: 0.6rem 0.9rem;
-        border-radius: 8px;
-        margin: 0.12rem 0;
-        transition: background 0.18s ease, transform 0.18s ease;
-    }
-
-    /* استخدم متغير RGB كنسخة احتياطية لو متوفر بواسطة السكريبت */
-    .dropdown-item:hover,
-    .dropdown-menu .nav-link:hover {
-        background: rgba(var(--app-primary-rgb,59,130,246),0.12);
-        color: var(--text-on-primary) !important;
-        transform: translateX(6px);
-    }
-
-    /* فاصل المنيو */
-    .dropdown-divider {
-        margin: 0.4rem 0;
-        border-top: 1px solid var(--border-medium);
-        opacity: 0.6;
-    }
-
-    /* الوضع الداكن */
-    [data-bs-theme="dark"] .dropdown-menu {
-        background: linear-gradient(180deg, var(--bg-card), rgba(255,255,255,0.02));
-        border: 1px solid var(--border-medium);
-        color: var(--text-primary);
-    }
-
-    [data-bs-theme="dark"] .dropdown-item:hover,
-    [data-bs-theme="dark"] .dropdown-menu .nav-link:hover {
-        background: rgba(255,255,255,0.04);
-        color: var(--text-on-primary) !important;
-    }
-
-    /* Mobile Toggle Button */
-    .navbar-toggler {
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        padding: 0.5rem;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-    }
-
-    .navbar-toggler:hover {
-        border-color: rgba(255, 255, 255, 0.5);
-        background: rgba(255, 255, 255, 0.1);
-    }
-
-    .navbar-toggler-icon {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 991.98px) {
-        .navbar-nav {
-            background: rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 1rem;
-            margin-top: 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .nav-link {
-            margin: 0.25rem 0;
-            text-align: center;
-        }
-        
-        .nav-link::before {
-            display: none;
-        }
-        
-        .user-info {
-            display: none;
-        }
-        
-        .theme-switch-wrapper {
-            margin-right: 0;
-            margin-bottom: 0.5rem;
-        }
-    }
-
-    /* Logo Image */
-    .logo-img {
-        height: 50px;
-        width: auto;
-        object-fit: contain;
-        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-    }
-
-    /* General elements */
-    h1, h2, h3, h4, h5, h6,
-    p, span, div, li, td, th,
-    label, small, .text-muted,
-    .card-title, .card-text,
-    .form-label, .form-control,
-    .table, .dropdown-item {
-        color: var(--text-primary) !important;
-        transition: color 0.3s ease;
-    }
-
-    .card {
-        background: var(--bg-card);
-        border: 1px solid var(--border-light);
-        border-radius: 16px;
-        box-shadow: var(--shadow-md);
-        transition: var(--transition-default);
-    }
-
+    .card,
+    .table,
+    .modal-content,
+    .list-group-item,
+    .dropdown-menu,
+    .alert,
     .form-control,
     .form-select,
     .input-group-text {
-        background: var(--bg-card);
-        border: 1px solid var(--border-medium);
+        background: var(--bg-surface) !important;
         color: var(--text-primary) !important;
-        transition: var(--transition-default);
+        border: 1px solid var(--border-color) !important;
+        border-radius: 1rem;
+        box-shadow: var(--shadow-soft);
     }
 
-    .alert {
+    .table {
+        overflow: hidden;
+    }
+
+    .table thead th {
+        background: linear-gradient(90deg, rgba(var(--app-primary-rgb), 0.08), rgba(var(--app-secondary-rgb), 0.08));
+        color: var(--text-secondary);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .btn {
+        border-radius: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, rgb(var(--app-primary-rgb)), rgb(var(--app-secondary-rgb)));
         border: none;
-        border-radius: 12px;
-        box-shadow: var(--shadow-md);
-        border-left: 5px solid currentColor;
-        background: var(--bg-card);
-        color: var(--text-primary) !important;
-        transition: var(--transition-default);
     }
 
-    .btn-primary,
-    .btn-success,
-    .btn-warning,
-    .btn-danger,
-    .btn-info {
-        color: white !important;
+    .btn-outline-primary {
+        border-color: rgb(var(--app-primary-rgb));
+        color: rgb(var(--app-primary-rgb));
     }
 
-    .btn-outline-primary,
-    .btn-outline-success,
-    .btn-outline-warning,
-    .btn-outline-danger,
-    .btn-outline-info {
-        color: var(--text-primary) !important;
+    .btn-outline-primary:hover {
+        background: rgb(var(--app-primary-rgb));
+        color: #fff;
+    }
+
+    footer {
+        background: rgba(18, 18, 38, 0.9);
+        color: #f8f7ff;
+        border-top: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    footer .text-muted,
+    footer a {
+        color: #d6d1ed !important;
+    }
+
+    .theme-switch-label {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: rgb(var(--app-primary-rgb));
+        box-shadow: 0 0 0 0.2rem rgba(var(--app-primary-rgb), 0.25);
+    }
+
+    .container > .alert {
+        border-left: 4px solid rgb(var(--app-primary-rgb)) !important;
     }
 </style>
 
